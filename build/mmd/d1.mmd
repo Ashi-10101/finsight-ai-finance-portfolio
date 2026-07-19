@@ -1,0 +1,68 @@
+flowchart TB
+    subgraph U["用户层"]
+        U1["研究员"]
+        U2["投资经理"]
+        U3["财富顾问"]
+        U4["风控合规人员"]
+    end
+
+    subgraph O["输出层"]
+        O1["内部投研报告"]
+        O2["客户沟通材料"]
+        O3["证据链与审计档案"]
+        O4["风险提示与免责声明"]
+    end
+
+    subgraph L6["合规、风控与 AI 治理（横向贯穿）"]
+        G1["适当性检查"]
+        G2["收益承诺与无依据建议检测"]
+        G3["人工审批与 AI 内容标识"]
+        G4["权限脱敏与审计追溯"]
+    end
+
+    subgraph L5["组合与财富管理层"]
+        W1["持仓导入与资产识别"]
+        W2["风险敞口与压力测试"]
+        W3["风险等级匹配与多方案比较"]
+        W4["客户版报告生成"]
+    end
+
+    subgraph L4["因果分析与情景推演层"]
+        C1["因果传导路径构建"]
+        C2["关键变量与失效条件"]
+        C3["乐观/基准/悲观情景推演"]
+        C4["历史相似事件比对"]
+    end
+
+    subgraph L3["可信证据链层"]
+        E1["来源与原文定位"]
+        E2["事实/共识/争议/推断/假设分层"]
+        E3["置信度与失效条件登记"]
+        E4["结论绑定证据"]
+    end
+
+    subgraph L2["多智能体投研引擎（11 角色）"]
+        A1["Research Planner"]
+        A2["Data/Macro/Fundamental Analyst"]
+        A3["Causal/Scenario/Portfolio Analyst"]
+        A4["Wealth Advisor Agent"]
+        A5["Compliance Reviewer / Evidence Auditor / Report Integrator"]
+    end
+
+    subgraph L1["多源金融数据与知识层"]
+        D1["行情/宏观/政策/公告/财报"]
+        D2["新闻/研报/内部材料"]
+        D3["客户持仓与风险画像（模拟数据）"]
+        D4["知识图谱 + 向量检索 + 结构化查询"]
+    end
+
+    U --> L6
+    L1 --> L2
+    L2 --> L3
+    L3 --> L4
+    L4 --> L5
+    L6 -.贯穿约束.-> L5
+    L6 -.贯穿约束.-> L4
+    L6 -.贯穿约束.-> L3
+    L6 -.贯穿约束.-> L2
+    L5 --> O

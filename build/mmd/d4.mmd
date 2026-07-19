@@ -1,0 +1,25 @@
+flowchart TB
+    TASK["研究任务输入"] --> RP["Research Planner（任务拆解）"]
+
+    RP --> DA["Data Analyst"]
+    RP --> MA["Macro Analyst"]
+    RP --> FA["Fundamental Analyst"]
+
+    DA --> CA["Causal Analyst（因果链构建）"]
+    MA --> CA
+    FA --> CA
+
+    CA --> SA["Scenario Analyst（三情景推演）"]
+    SA --> PA["Portfolio Analyst（组合影响评估）"]
+    PA --> WA["Wealth Advisor Agent（客户适配方案）"]
+
+    WA --> HUMAN{"人工确认节点"}
+    HUMAN -->|确认通过| CR["Compliance Reviewer（合规审核）"]
+    HUMAN -->|退回修改| WA
+
+    CR --> EA["Evidence Auditor（证据审计）"]
+    EA --> RI["Report Integrator（报告整合输出）"]
+
+    CR -.不合规回退.-> RP
+    EA -.证据不足回退.-> DA
+    EA -.因果链存疑回退.-> CA

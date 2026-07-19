@@ -1,0 +1,56 @@
+flowchart TB
+    subgraph EDGE["私有化部署边界（金融机构内网）"]
+        subgraph FE["前端工作台"]
+            FE1["研究员/投资经理工作台"]
+            FE2["财富顾问工作台"]
+            FE3["证据链审阅界面"]
+        end
+
+        subgraph GW["API 网关"]
+            GW1["统一鉴权与限流"]
+            GW2["请求路由与审计埋点"]
+        end
+
+        subgraph ORCH["多智能体编排层"]
+            OC1["任务规划与拆解"]
+            OC2["Pipeline 编排（Plan-Worker-Review-Integrate）"]
+            OC3["执行追踪与状态落库"]
+            OC4["冲突回退与人工确认节点"]
+        end
+
+        subgraph MG["模型网关"]
+            MG1["多模型统一接入"]
+            MG2["按角色路由（规划/分析/审核）"]
+            MG3["失败回退与降级模型"]
+            MG4["调用记录与提示词版本管理"]
+        end
+
+        subgraph RET["检索层"]
+            R1["向量检索（语义）"]
+            R2["知识图谱检索（实体关系）"]
+            R3["结构化查询（行情/财务）"]
+            R4["混合检索与证据组装"]
+        end
+
+        subgraph DATA["数据层"]
+            DA1["多源原始库"]
+            DA2["清洗后知识库"]
+            DA3["图谱库/向量库/结构化库"]
+            DA4["脱敏与权限分级"]
+        end
+
+        subgraph AUD["审计与权限（横切）"]
+            AU1["操作日志"]
+            AU2["模型调用留痕"]
+            AU3["角色权限与数据分级"]
+        end
+
+        FE --> GW --> ORCH
+        ORCH --> MG
+        ORCH --> RET
+        MG --> RET
+        RET --> DATA
+        AUD -.横切留痕.-> GW
+        AUD -.横切留痕.-> ORCH
+        AUD -.横切留痕.-> MG
+    end

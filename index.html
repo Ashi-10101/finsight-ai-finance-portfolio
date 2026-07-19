@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金策 FinSight — 可信金融投研与财富决策智能体平台</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root {
+    --bg:#0a0a0c; --panel:#121215; --panel2:#17171b; --line:#26262c; --line2:#1e1e23;
+    --ink:#ececf1; --sub:#9b9ba6; --dim:#6d6d78;
+    --blue:#7aa2f7; --orange:#e0a05a; --sage:#8fbc8f; --clay:#c97b6f;
+  }
+  html { scroll-behavior:smooth; }
+  body { font-family:-apple-system,"SF Pro Display","PingFang SC","Helvetica Neue",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7; font-size:15px;
+    -webkit-font-smoothing:antialiased; font-variant-numeric:tabular-nums; }
+  a { color:var(--blue); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .wrap { max-width:1060px; margin:0 auto; padding:0 24px; }
+  header.hero { padding:88px 0 56px; border-bottom:1px solid var(--line2); }
+  .kicker { font-size:12px; letter-spacing:.22em; color:var(--sub); text-transform:uppercase; margin-bottom:18px; }
+  h1 { font-size:44px; font-weight:700; letter-spacing:.01em; }
+  h1 .en { color:var(--sub); font-weight:400; }
+  .tagline { font-size:18px; color:var(--sub); max-width:760px; margin-top:16px; }
+  .meta { display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; }
+  .chip { font-size:12.5px; color:var(--sub); border:1px solid var(--line); border-radius:999px; padding:5px 14px; background:var(--panel); }
+  .chip b { color:var(--ink); font-weight:600; }
+  nav.toc { position:sticky; top:0; z-index:50; background:rgba(10,10,12,.86); backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line2); }
+  nav.toc .wrap { display:flex; gap:4px; overflow-x:auto; padding-top:10px; padding-bottom:10px; }
+  nav.toc a { font-size:12.5px; color:var(--sub); white-space:nowrap; padding:5px 11px; border-radius:8px; }
+  nav.toc a:hover { color:var(--ink); background:var(--panel2); text-decoration:none; }
+  section { padding:64px 0; border-bottom:1px solid var(--line2); }
+  .num { font-size:12px; color:var(--dim); letter-spacing:.2em; margin-bottom:10px; }
+  h2 { font-size:26px; font-weight:650; margin-bottom:8px; }
+  .conclusion { color:var(--sage); font-size:14.5px; margin-bottom:26px; }
+  p.body { color:var(--sub); max-width:820px; }
+  .grid { display:grid; gap:14px; }
+  .g2 { grid-template-columns:repeat(2,1fr); }
+  .g3 { grid-template-columns:repeat(3,1fr); }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px 22px; }
+  .card h3 { font-size:15.5px; margin-bottom:6px; font-weight:600; }
+  .card p { font-size:13.5px; color:var(--sub); }
+  .card .idx { font-size:11px; color:var(--dim); letter-spacing:.18em; margin-bottom:8px; }
+  .stat { font-size:30px; font-weight:700; }
+  .stat small { display:block; font-size:12.5px; color:var(--sub); font-weight:400; margin-top:4px; }
+  .src { font-size:11.5px; color:var(--dim); margin-top:6px; }
+  .shot { background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+  .shot img { width:100%; display:block; border-bottom:1px solid var(--line2); }
+  .shot .cap { padding:12px 16px; font-size:13px; color:var(--sub); display:flex; justify-content:space-between; align-items:center; }
+  .shot .cap a { font-size:12.5px; }
+  .diagram { background:#fff; border-radius:14px; padding:14px; }
+  .diagram img { width:100%; display:block; }
+  .tag { display:inline-block; font-size:11px; border-radius:6px; padding:2px 8px; margin-right:6px; border:1px solid var(--line); color:var(--sub); }
+  .tag.fact { color:#e8e8ee; border-color:#4a4a55; }
+  .tag.view { color:var(--blue); border-color:var(--blue); }
+  .tag.infer { color:var(--orange); border-color:var(--orange); }
+  .tag.risk { color:var(--clay); border-color:var(--clay); }
+  table { width:100%; border-collapse:collapse; font-size:13.5px; margin-top:8px; }
+  th,td { border:1px solid var(--line); padding:9px 12px; text-align:left; vertical-align:top; }
+  th { background:var(--panel2); font-weight:600; font-size:12.5px; }
+  td { color:var(--sub); }
+  td b { color:var(--ink); }
+  .banner { background:var(--panel2); border:1px solid var(--line); border-left:3px solid var(--orange);
+    border-radius:10px; padding:14px 18px; font-size:13px; color:var(--sub); margin:22px 0; }
+  footer { padding:48px 0 64px; color:var(--dim); font-size:13px; }
+  .files li { margin:7px 0; list-style:none; font-size:14px; }
+  .files li span { color:var(--dim); font-size:12.5px; margin-left:8px; }
+  @media (max-width:820px){ .g2,.g3 { grid-template-columns:1fr; } h1 { font-size:32px; } }
+</style>
+</head>
+<body>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">2026 AI先锋未来人才大赛 · 东部赛区（上海）· 金仕达企业命题</div>
+  <h1>金策 <span class="en">FinSight</span></h1>
+  <p class="tagline">可信金融投研与财富决策智能体平台 —— 基于多智能体、可信证据链、因果推演、组合分析和合规审查，把分散的金融信息转化为可追溯、可解释、可审核、可执行的投研结论和财富管理方案。</p>
+  <div class="meta">
+    <span class="chip">团队：<b>周子涵</b>（中山大学·临床医学2023级）× <b>马文婷</b>（广东创新科技职业技术学院·法律文秘2024级）</span>
+    <span class="chip">状态：<b>方案设计 + 产品原型</b></span>
+    <span class="chip">GitHub：<b>Ashi-10101</b></span>
+    <span class="chip">联系：<b>xs0276940@gmail.com</b></span>
+  </div>
+</div></header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#pain">行业痛点</a><a href="#solution">解决方案</a><a href="#scenario">旗舰场景</a>
+  <a href="#prototype">产品原型</a><a href="#arch">技术架构</a><a href="#innovation">核心创新</a>
+  <a href="#value">业务价值</a><a href="#eval">评测计划</a><a href="#roadmap">开发路线</a>
+  <a href="#team">团队</a><a href="#files">材料下载</a>
+</div></nav>
+
+<section id="pain"><div class="wrap">
+  <div class="num">01 / PROBLEM</div>
+  <h2>行业痛点：不是缺信息，而是缺可信结论</h2>
+  <p class="conclusion">核心矛盾已从信息稀缺转为"可信结论稀缺"——终端解决"查得到"，没人解决"信得过、用得上、审得过"。</p>
+  <div class="grid g3">
+    <div class="card"><div class="stat">278<small>万亿元 · 中国个人可投资资产（2022年末）</small></div><div class="src">招商银行×贝恩《2023中国私人财富报告》【行业报告】</div></div>
+    <div class="card"><div class="stat">81%<small>GPT-4-Turbo+RAG 金融问答答错或拒答比例</small></div><div class="src">FinanceBench, arXiv:2311.11944【学术研究】</div></div>
+    <div class="card"><div class="stat">19%<small>知识工作者用于检索搜集信息的工时占比</small></div><div class="src">麦肯锡全球研究院【行业报告】</div></div>
+  </div>
+  <p class="body" style="margin-top:22px">信息分散在行情、公告、财报、政策、研报与内部资料中；通用大模型存在幻觉、数字错误与引用缺失；Bloomberg、Wind Alice、AlphaSense 等头部产品仍停留在搜索与摘要，缺少从宏观事件到客户组合的决策闭环；投研、财富、合规流程割裂，结论难溯源、数字不敢引用、合规事后补漏。与此同时，金融大模型已进入规模化落地（同花顺 HithinkGPT 成为业内首个通过网信办备案的金融对话大模型，2025年2月至少16家券商完成 DeepSeek 本地化部署），合规是前置约束而非事后补丁。</p>
+</div></section>
+
+<section id="solution"><div class="wrap">
+  <div class="num">02 / SOLUTION</div>
+  <h2>解决方案：六层架构的人机协同决策流水线</h2>
+  <p class="conclusion">不是财经聊天机器人，不是荐股系统——AI 仅辅助研究与决策，重要建议保留人工确认，全程审计留痕。</p>
+  <div class="grid g3">
+    <div class="card"><div class="idx">L1</div><h3>多源数据与知识层</h3><p>行情/宏观/公告/财报/政策/研报/内部资料统一接入，来源标记、时间有效性、权限分级、敏感脱敏。</p></div>
+    <div class="card"><div class="idx">L2</div><h3>多智能体投研引擎</h3><p>规划/数据/宏观/基本面/因果/情景/组合/财富/合规/证据审计/整合，11类角色交叉审核。</p></div>
+    <div class="card"><div class="idx">L3</div><h3>可信证据链</h3><p>每项结论下钻至原文位置，附假设、反例、置信度、失效条件；事实/观点/推断分层。</p></div>
+    <div class="card"><div class="idx">L4</div><h3>因果推演</h3><p>回答事件沿何路径、在什么条件下、在多长尺度上影响哪些资产，附结论失效条件。</p></div>
+    <div class="card"><div class="idx">L5</div><h3>组合与财富模块</h3><p>研究结论映射到客户持仓、风险等级、期限与流动性约束，多方案比较，双版本报告。</p></div>
+    <div class="card"><div class="idx">L6</div><h3>合规即流程</h3><p>适当性、收益承诺检测、风险提示完整性、人工审批内嵌工作流；全程留痕，支持私有化部署。</p></div>
+  </div>
+</div></section>
+
+<section id="scenario"><div class="wrap">
+  <div class="num">03 / FLAGSHIP SCENARIO</div>
+  <h2>旗舰场景：从宏观事件到客户组合建议的完整闭环</h2>
+  <p class="conclusion">"美联储加息信号 → 黄金/原油/美股/人民币资产 + 模拟客户组合 → 内部投研报告 + 客户沟通材料"。</p>
+  <p class="body">检索央行讲话与权威数据 → 事实/观点/推断分层 → 构建利率—美元—实际利率—黄金—权益—汇率因果链 → 乐观/基准/悲观三情景 → 模拟客户组合压力测试 → 按风险等级与期限约束生成备选方案 → 合规审查 → 人工确认 → 双版本报告输出 → 证据链与审计归档。</p>
+  <div class="banner">演示页面与样本中的客户、持仓与市场数值均为模拟数据，仅用于展示产品逻辑，不构成投资建议。</div>
+</div></section>
+
+<section id="prototype"><div class="wrap">
+  <div class="num">04 / PROTOTYPE</div>
+  <h2>产品原型（非上线产品）</h2>
+  <p class="conclusion">六张高保真界面，每张均体现数据时间、来源、分层标注、智能体状态、证据引用、置信度、风险提示与人工确认。</p>
+  <div class="grid g2">
+    <div class="shot"><img src="assets/screenshots/01_home.png" alt="金策首页"><div class="cap">01 金策首页 · 工作台总览 <a href="prototype/01_home.html">在线查看 →</a></div></div>
+    <div class="shot"><img src="assets/screenshots/02_task_input.png" alt="任务输入"><div class="cap">02 智能投研任务输入 <a href="prototype/02_task_input.html">在线查看 →</a></div></div>
+    <div class="shot"><img src="assets/screenshots/03_agent_run.png" alt="多智能体执行"><div class="cap">03 多智能体执行过程 <a href="prototype/03_agent_run.html">在线查看 →</a></div></div>
+    <div class="shot"><img src="assets/screenshots/04_causal_scenario.png" alt="因果与情景"><div class="cap">04 因果链与情景推演 <a href="prototype/04_causal_scenario.html">在线查看 →</a></div></div>
+    <div class="shot"><img src="assets/screenshots/05_portfolio.png" alt="组合分析"><div class="cap">05 组合风险分析 <a href="prototype/05_portfolio.html">在线查看 →</a></div></div>
+    <div class="shot"><img src="assets/screenshots/06_report.png" alt="报告与合规"><div class="cap">06 财富顾问及客户报告 <a href="prototype/06_report.html">在线查看 →</a></div></div>
+  </div>
+</div></section>
+
+<section id="arch"><div class="wrap">
+  <div class="num">05 / ARCHITECTURE</div>
+  <h2>技术架构与业务流程</h2>
+  <p class="conclusion">八张架构设计图（规划中）：产品、技术、数据、多智能体协作、证据链、业务流、合规流、金仕达集成示意。</p>
+  <div class="grid g2">
+    <div class="card" style="grid-column:1/-1"><h3>多智能体协作图</h3><div class="diagram"><img src="assets/diagrams/diagram-4.svg" alt="多智能体协作图"></div></div>
+    <div class="card"><h3>产品架构图（六层）</h3><div class="diagram"><img src="assets/diagrams/diagram-1.svg" alt="产品架构图"></div></div>
+    <div class="card"><h3>合规审核流程图</h3><div class="diagram"><img src="assets/diagrams/diagram-7.svg" alt="合规审核流程"></div></div>
+  </div>
+  <p class="body" style="margin-top:16px">完整八张图见 <a href="https://github.com/Ashi-10101/finsight-ai-finance-portfolio/blob/main/docs/06_技术架构与业务流程.md">技术架构与业务流程图集</a>（GitHub 可直接渲染 Mermaid）或 <a href="pdfs/06_金策_FinSight_技术架构与业务流程.pdf">PDF 版</a>。金仕达系统集成为"拟接入/企业授权后集成"的规划意向，未接入任何生产系统。</p>
+</div></section>
+
+<section id="innovation"><div class="wrap">
+  <div class="num">06 / INNOVATION</div>
+  <h2>核心创新</h2>
+  <p class="conclusion">创新不在大模型、RAG、多智能体本身，而在以下七点。</p>
+  <div class="grid g3">
+    <div class="card"><div class="idx">I-1</div><h3>证据原生</h3><p>数据—证据—推理—结论—建议全链路形成于研究过程，而非生成后补引用。</p></div>
+    <div class="card"><div class="idx">I-2</div><h3>分层表达</h3><p><span class="tag fact">事实</span><span class="tag view">观点</span><span class="tag infer">推断</span>界面级区分，市场观点不会被包装成已确认事实。</p></div>
+    <div class="card"><div class="idx">I-3</div><h3>因果附失效条件</h3><p>不只给方向，还给传导路径、关键假设、反例与结论失效条件。</p></div>
+    <div class="card"><div class="idx">I-4</div><h3>投研财富一体化</h3><p>研究结论直接映射到客户组合、风险画像与沟通材料。</p></div>
+    <div class="card"><div class="idx">I-5</div><h3>合规即流程</h3><p>适当性、风险提示、证据审核与人工审批内嵌于工作流，而非事后补漏。</p></div>
+    <div class="card"><div class="idx">I-6</div><h3>交叉审核 + 人机协同</h3><p>11类角色互相校验降低单模型错误；重要结论保留人工判断与责任边界。</p></div>
+  </div>
+</div></section>
+
+<section id="value"><div class="wrap">
+  <div class="num">07 / VALUE</div>
+  <h2>业务价值（MVP 目标值，待验证）</h2>
+  <p class="conclusion">所有量化数字为 MVP 目标值，需经三组对照实验验证后方可对外引用。</p>
+  <table>
+    <tr><th>角色</th><th>价值</th><th>量化目标（MVP目标值，待验证）</th></tr>
+    <tr><td><b>研究员</b></td><td>减少检索整理时间、提高引用完整性、降低数字错误</td><td>单事件研究耗时降低 50%+；引用覆盖率 ≥95%；数字准确率 ≥98%</td></tr>
+    <tr><td><b>投资经理</b></td><td>宏观事件到组合影响的分析效率、情景压力测试</td><td>组合计算准确率 ≥99%；压力测试分钟级产出</td></tr>
+    <tr><td><b>财富顾问</b></td><td>研究结论快速转化为客户可理解材料</td><td>报告由小时级降至分钟级；任务完成率 ≥90%</td></tr>
+    <tr><td><b>风控合规</b></td><td>风险话术识别、证据检查、适当性冲突检查、留痕</td><td>合规风险话术召回率 ≥90%；审核记录覆盖率 100%</td></tr>
+  </table>
+</div></section>
+
+<section id="eval"><div class="wrap">
+  <div class="num">08 / EVALUATION</div>
+  <h2>评测计划</h2>
+  <p class="conclusion">三组对照、30 个标准任务、14 项指标、人工双盲 + 程序化校验。</p>
+  <div class="grid g3">
+    <div class="card"><h3>对照 A</h3><p>普通单模型直答</p></div>
+    <div class="card"><h3>对照 B</h3><p>单模型 + RAG</p></div>
+    <div class="card"><h3>实验组 C</h3><p>金策多智能体 + 证据链 + 合规方案</p></div>
+  </div>
+  <p class="body" style="margin-top:16px">测试集：30 个金融研究任务（宏观事件 10 / 公司基本面 10 / 组合与合规 10）。指标：事实准确率、数字准确率、引用覆盖率、引用支持率、无依据结论比例、信息时效性、组合计算准确率、合规召回率、报告生成时间、任务完成率、模型成本、延迟、失败率、满意度。难度佐证：FinanceBench 中 GPT-4-Turbo+RAG 81% 答错或拒答。详见 <a href="pdfs/金策_FinSight_评测方案.pdf">评测方案 PDF</a>。</p>
+</div></section>
+
+<section id="roadmap"><div class="wrap">
+  <div class="num">09 / ROADMAP</div>
+  <h2>开发路线</h2>
+  <p class="conclusion">入围后 8 周交付 MVP，12 周完成复赛深化。</p>
+  <table>
+    <tr><th>阶段</th><th>内容</th></tr>
+    <tr><td><b>W1–2</b></td><td>数据接入层 MVP（公开数据源 + 模拟持仓）、证据链数据模型</td></tr>
+    <tr><td><b>W3–4</b></td><td>多智能体引擎（基于已验证的 MoA 编排内核扩展 11 角色）、因果推演</td></tr>
+    <tr><td><b>W5–6</b></td><td>组合分析 + 财富适配 + 合规审查工作流、双版本报告</td></tr>
+    <tr><td><b>W7–8</b></td><td>三组对照评测、私有化部署包、演示视频与复赛材料</td></tr>
+    <tr><td><b>长期</b></td><td>企业授权后对接金仕达交易/行情/风控/合规/财富系统，机构试点</td></tr>
+  </table>
+</div></section>
+
+<section id="team"><div class="wrap">
+  <div class="num">10 / TEAM</div>
+  <h2>团队</h2>
+  <p class="conclusion">医学证据意识 × 智能体系统工程 × 法律合规文本。</p>
+  <div class="grid g2">
+    <div class="card">
+      <h3>周子涵 · 产品与系统开发</h3>
+      <p>中山大学临床医学本科2023级（2028届）。循证医学训练的证据意识与责任边界；长期独立开发 AI 产品与多智能体系统，先导项目均有真实代码与生产部署：</p>
+      <p style="margin-top:8px">· <b>Mindraft AI Gateway</b>：MoA 四阶段编排、SSE 追踪、模型回退（Phase 1 已完成并上线自用）<br>· <b>Trader Terminal</b>：交易工作流引擎，状态机 + 字段锁定（v0.1 已完成）<br>· <b>Mindraft OS</b>：个人工作台多模块日用，含 Futures 期货仓位计算器<br>· <b>Memomeld</b>：知识管理（开发中，骨架已完成并部署）<br>· <b>news-backend</b>：金融资讯聚合管线（运行中）</p>
+      <p style="margin-top:8px">正在系统学习 CFA Program Level I 课程体系。</p>
+    </div>
+    <div class="card">
+      <h3>马文婷 · 合规文本与材料支持</h3>
+      <p>广东创新科技职业技术学院法律文秘专业2024级（2027届）。负责合规要点梳理、法律文书与材料规范化、文档质量控制。</p>
+    </div>
+  </div>
+</div></section>
+
+<section id="files"><div class="wrap">
+  <div class="num">11 / DOWNLOADS</div>
+  <h2>材料下载</h2>
+  <ul class="files">
+    <li><a href="pdfs/01_金策_FinSight_开题方案.pdf">01 金策 FinSight 开题方案</a><span>25页 PDF</span></li>
+    <li><a href="pdfs/02_周子涵_参赛简历.pdf">02 周子涵 参赛简历</a><span>2页 PDF</span></li>
+    <li><a href="pdfs/03_周子涵_AI与金融科技项目作品集.pdf">03 周子涵 AI与金融科技项目作品集</a><span>13页 PDF</span></li>
+    <li><a href="pdfs/04_金策_FinSight_行业与竞品研究.pdf">04 行业与竞品研究</a><span>25页 PDF</span></li>
+    <li><a href="pdfs/06_金策_FinSight_技术架构与业务流程.pdf">06 技术架构与业务流程</a><span>PDF</span></li>
+    <li><a href="pdfs/金策_FinSight_评测方案.pdf">评测方案</a><span>三组对照实验设计</span></li>
+    <li><a href="pdfs/金策_FinSight_数据分析与报告样本.pdf">数据分析与报告样本</a><span>7份演示样本（模拟数据）</span></li>
+    <li><a href="https://github.com/Ashi-10101/finsight-ai-finance-portfolio">GitHub 展示仓库</a><span>全部源文件</span></li>
+  </ul>
+  <div class="banner">演示视频制作中。先导项目完整仓库当前为 Private，公开前将完成密钥与私人数据清理；本页面及仓库不含任何敏感信息。</div>
+</div></section>
+
+<footer><div class="wrap">
+  <p><b>金策 FinSight</b> — 可信金融投研与财富决策智能体平台 · 2026 AI先锋未来人才大赛（东部赛区·金仕达命题）参赛材料</p>
+  <p style="margin-top:8px">页面内全部客户与持仓数据为模拟数据；量化指标为 MVP 目标值，待对照实验验证；与金仕达系统的集成为规划意向，尚未接入；产品截图为产品原型，非上线产品。AI 仅辅助研究与决策，不构成投资建议。</p>
+  <p style="margin-top:8px">联系：xs0276940@gmail.com ｜ GitHub: <a href="https://github.com/Ashi-10101/finsight-ai-finance-portfolio">Ashi-10101/finsight-ai-finance-portfolio</a></p>
+</div></footer>
+
+</body>
+</html>

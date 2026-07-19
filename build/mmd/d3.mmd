@@ -1,0 +1,35 @@
+flowchart LR
+    subgraph SRC["多源接入"]
+        S1["行情数据"]
+        S2["宏观与政策"]
+        S3["公告与财报"]
+        S4["新闻与研报"]
+        S5["内部材料"]
+    end
+
+    CLEAN["清洗与标准化"]
+    NER["实体识别（公司/人物/指标/事件）"]
+    TIME["时间有效性标注（发布/更新/失效）"]
+    PROV["来源标记与原文定位"]
+    CONF["冲突检测与争议标记"]
+
+    subgraph STORE["三类存储"]
+        KG["知识图谱"]
+        VEC["向量库"]
+        SQL["结构化数据库"]
+    end
+
+    RS["统一检索服务（混合检索 + 证据组装）"]
+
+    S1 --> CLEAN
+    S2 --> CLEAN
+    S3 --> CLEAN
+    S4 --> CLEAN
+    S5 --> CLEAN
+    CLEAN --> NER --> TIME --> PROV --> CONF
+    CONF -->|实体关系| KG
+    CONF -->|语义片段| VEC
+    CONF -->|指标数据| SQL
+    KG --> RS
+    VEC --> RS
+    SQL --> RS
