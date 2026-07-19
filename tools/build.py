@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-"""FinSight portfolio build: MD -> styled HTML -> PDF (Chrome headless), prototype screenshots."""
-import subprocess, pathlib, markdown
+"""FinSight portfolio build: MD -> styled HTML -> PDF, prototype screenshots."""
+import re
+import subprocess
+import pathlib
+import markdown
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SRC = pathlib.Path("/Users/ashi/Downloads/OpenCode/金策_FinSight_报名材料")
@@ -30,9 +33,22 @@ blockquote { border-left: 3px solid #999; margin-left: 0; padding-left: 10px; co
 strong { color: #000; }
 """
 
-MERMAID_SNIPPET = """
-<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-<script>mermaid.initialize({startOnLoad:true, theme:"neutral", securityLevel:"loose"});</script>
+RESUME_CSS = """
+@page { size: A4; margin: 11mm 13mm; }
+* { box-sizing: border-box; }
+body { font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  color: #1a1a1a; font-size: 8.8pt; line-height: 1.38; max-width: 184mm; margin: 0 auto; }
+h1 { font-size: 16pt; margin: 0 0 2px; border-bottom: 2px solid #1a1a1a; padding-bottom: 3px; }
+h2 { font-size: 10.5pt; margin: .9em 0 .35em; border-left: 3.5px solid #444; padding-left: 7px; }
+h3 { font-size: 9.5pt; margin: .65em 0 .2em; }
+p { margin: .25em 0; }
+ul { margin: .18em 0 .35em; padding-left: 1.2em; }
+li { margin: .1em 0; }
+hr { border: none; page-break-after: always; }
+table { border-collapse: collapse; width: 100%; font-size: 7.9pt; margin: 4px 0; }
+th, td { border: 1px solid #bbb; padding: 2.5px 5px; text-align: left; vertical-align: top; }
+th { background: #f0f0f0; }
+blockquote { border-left: 3px solid #999; margin: 3px 0; padding-left: 8px; color: #444; }
 """
 
 DOCS = [
@@ -45,33 +61,41 @@ DOCS = [
     ("09_样本/I_数据分析与报告样本.md", "金策_FinSight_数据分析与报告样本.pdf", False),
 ]
 
+def replace_mermaid_with_svgs(text: str) -> str:
+    diagram = 0
+
+    def replace(match: re.Match[str]) -> str:
+        nonlocal diagram
+        diagram += 1
+        svg = ROOT / "assets" / "diagrams" / f"diagram-{diagram}.svg"
+        if not svg.exists():
+            raise FileNotFoundError(f"Missing rendered diagram: {svg}")
+        return (
+            '<p style="text-align:center;page-break-inside:avoid">'
+            f'<img src="../assets/diagrams/diagram-{diagram}.svg" '
+            'style="max-width:100%;max-height:235mm" alt="架构图">'
+            '</p>'
+        )
+
+    result = re.sub(r"```mermaid\n(.*?)```", replace, text, flags=re.S)
+    if diagram != 8:
+        raise ValueError(f"Expected 8 Mermaid diagrams, found {diagram}")
+    return result
+
+
 def md_to_html(md_path: pathlib.Path, use_mermaid: bool) -> pathlib.Path:
     text = md_path.read_text(encoding="utf-8")
     if use_mermaid:
-        # wrap ```mermaid blocks into <pre class="mermaid">
-        out, in_m, buf = [], False, []
-        for line in text.splitlines():
-            if line.strip().startswith("```"):
-                if not in_m and "mermaid" in line:
-                    in_m, buf = True, []
-                    continue
-                elif in_m:
-                    out.append('<pre class="mermaid">' + "\n".join(buf) + "</pre>")
-                    in_m = False
-                    continue
-            if in_m:
-                buf.append(line)
-            else:
-                out.append(line)
-        text = "\n".join(out)
+        text = replace_mermaid_with_svgs(text)
     body = markdown.markdown(text, extensions=["tables", "fenced_code"])
-    html = f"<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'><style>{CSS}</style>{MERMAID_SNIPPET if use_mermaid else ''}</head><body>{body}</body></html>"
+    css = RESUME_CSS if md_path.name == "02_周子涵_参赛简历.md" else CSS
+    html = f"<!DOCTYPE html><html lang='zh-CN'><head><meta charset='utf-8'><style>{css}</style></head><body>{body}</body></html>"
     out = BUILD / (md_path.stem + ".html")
     out.write_text(html, encoding="utf-8")
     return out
 
-def chrome(args, timeout=90):
-    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--no-pdf-header-footer"] + args,
+def chrome(args, timeout=150):
+    subprocess.run([CHROME, "--headless=new", "--disable-gpu", "--disable-background-networking", "--no-pdf-header-footer"] + args,
                    check=True, timeout=timeout, capture_output=True)
 
 for md_name, pdf_name, use_m in DOCS:
