@@ -30,13 +30,15 @@
 ### 材料入口
 | 材料 | 链接 |
 |---|---|
-| 项目主页（统一入口） | [待补] |
-| 开题方案 PDF | [待补] |
-| 行业与竞品研究 | [待补] |
-| 产品原型（HTML） | [待补] |
-| 技术架构图集 | [待补] |
-| 参赛简历 | [待补] |
-| 演示视频 | [待补] |
+| 项目主页（统一入口） | https://ashi-10101.github.io/finsight-ai-finance-portfolio/ |
+| 开题方案 PDF（25页） | https://ashi-10101.github.io/finsight-ai-finance-portfolio/pdfs/01_金策_FinSight_开题方案.pdf |
+| 行业与竞品研究 PDF（25页） | https://ashi-10101.github.io/finsight-ai-finance-portfolio/pdfs/04_金策_FinSight_行业与竞品研究.pdf |
+| 产品原型（HTML 在线） | https://ashi-10101.github.io/finsight-ai-finance-portfolio/prototype/01_home.html |
+| 技术架构图集 | https://github.com/Ashi-10101/finsight-ai-finance-portfolio/blob/main/docs/06_技术架构与业务流程.md |
+| 参赛简历 PDF（2页） | https://ashi-10101.github.io/finsight-ai-finance-portfolio/pdfs/02_周子涵_参赛简历.pdf |
+| 项目作品集 PDF（13页） | https://ashi-10101.github.io/finsight-ai-finance-portfolio/pdfs/03_周子涵_AI与金融科技项目作品集.pdf |
+| 评测方案 / 数据样本 PDF | https://ashi-10101.github.io/finsight-ai-finance-portfolio/pdfs/ |
+| 演示视频 | 制作中（脚本见本仓库 docs） |
 
 ---
 
@@ -47,22 +49,22 @@
 ### Mindraft AI Gateway — 多智能体协作基础设施 ｜ Phase 1 MVP 已完成
 Pipeline MoA 四阶段编排（Planner→Worker→Reviewer→Integrator，含 repair）、SSE 实时追踪、执行落库、模型回退。
 `Next.js 15 · Fastify · Drizzle · Postgres · SSE · zod`
-仓库：[链接待补]
+仓库：清理后公开（当前 Private）
 
 ### Memomeld — AI 知识管理与工作流 ｜ 开发中（骨架完成，已部署）
 知识沉淀、标签体系、模块化全栈骨架。
 `Node.js · Docker Compose · Postgres · Zod`
-仓库：[链接待补]
+仓库：清理后公开（当前 Private）
 
 ### Mindraft OS — 个人数字工作台 ｜ 多模块已完成并日用
 Today / Calendar（Google 实时打通）/ 服务健康监控（数据 provenance 分层）/ Futures 期货仓位计算器。AI Studio 为明确标注的界面预览。
 `Next.js App Router · Node 22`
-仓库：[链接待补]
+仓库：清理后公开（当前 Private）
 
 ### Trader Terminal — 交易工作流引擎 ｜ v0.1 已完成（本地单用户）
 DRAFT→PLANNED→ACTIVE→CLOSED→JOURNALED 状态机、字段锁定、计划执行率与守纪胜率统计。
 `Next.js 14 · tRPC · Drizzle · SQLite · Zod`
-仓库：[链接待补]
+仓库：清理后公开（当前 Private）
 
 ---
 
