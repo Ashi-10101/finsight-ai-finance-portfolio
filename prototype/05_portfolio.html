@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金策 FinSight · 组合风险分析（产品原型）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --gb:rgba(255,255,255,.14); --tp:rgba(255,255,255,.95); --ts:rgba(255,255,255,.5);
+    --up:#f2f2f5; --down:#8a8a92; --blue:#8fbcff; --orange:#ffab66;
+  }
+  body{ font-family:-apple-system,"SF Pro Display","Helvetica Neue","PingFang SC",sans-serif;
+    background:#050506; color:var(--tp); min-height:100vh; -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums; padding-top:46px; }
+  .aurora{ position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .orb{ position:absolute; border-radius:50%; filter:blur(110px); }
+  .o1{ width:55vmax; height:55vmax; opacity:.14; background:radial-gradient(circle at 30% 30%,#fff,transparent 70%); top:-25%; left:-15%; }
+  .o2{ width:45vmax; height:45vmax; opacity:.09; background:radial-gradient(circle at 60% 40%,#9a9aa5,transparent 72%); bottom:-25%; right:-8%; }
+  .glass{ position:relative; background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.03) 45%,rgba(255,255,255,.015));
+    backdrop-filter:blur(26px) saturate(140%); -webkit-backdrop-filter:blur(26px) saturate(140%);
+    border:1px solid var(--gb); border-radius:22px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.22); overflow:hidden; }
+  .glass::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(110% 55% at 18% -8%,rgba(255,255,255,.14),transparent 55%); }
+  .proto-banner{ position:fixed; top:0; left:0; right:0; z-index:100; height:46px;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    background:rgba(8,8,10,.92); backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(255,171,102,.35); font-size:12px; letter-spacing:.5px; }
+  .proto-banner b{ color:var(--orange); font-weight:800; }
+  .proto-banner .dotsep{ color:var(--ts); }
+  .wrap{ position:relative; z-index:2; max-width:1440px; margin:0 auto; padding:22px; display:flex; flex-direction:column; gap:18px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:20px 26px; flex-wrap:wrap; gap:14px; }
+  h1{ font-size:21px; font-weight:800; letter-spacing:-.3px; }
+  .meta-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:11.5px; color:var(--ts); }
+  .src{ display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:100px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); font-size:10.5px; }
+  .lv{ display:inline-flex; align-items:center; padding:2px 9px; border-radius:100px; font-size:10px; font-weight:800; letter-spacing:.5px; }
+  .lv-fact{ background:rgba(255,255,255,.92); color:#050506; }
+  .lv-view{ background:rgba(143,188,255,.14); color:var(--blue); border:1px solid rgba(143,188,255,.4); }
+  .lv-infer{ background:rgba(255,171,102,.12); color:var(--orange); border:1px solid rgba(255,171,102,.4); }
+  .lv-risk{ background:rgba(255,255,255,.05); color:var(--down); border:1px dashed rgba(255,255,255,.25); }
+  .evi{ display:inline-flex; padding:1px 7px; border-radius:6px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.18); font-size:10px; font-weight:700; }
+  .st{ display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; padding:3px 10px; border-radius:100px; }
+  .st i{ width:6px; height:6px; border-radius:50%; }
+  .st-review{ background:rgba(255,171,102,.12); color:var(--orange); border:1px solid rgba(255,171,102,.4); }
+  .st-review i{ background:var(--orange); animation:pulse 1.4s infinite; }
+  .st-done{ background:rgba(255,255,255,.12); color:var(--up); border:1px solid rgba(255,255,255,.22); }
+  .st-done i{ background:var(--up); }
+  @keyframes pulse{ 50%{ opacity:.3; box-shadow:0 0 0 5px rgba(255,255,255,.12); } }
+  .card{ padding:22px 24px; }
+  .card-title{ font-size:15px; font-weight:700; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .card-sub{ font-size:11px; color:var(--ts); margin-top:4px; margin-bottom:14px; }
+  .conf{ display:inline-flex; align-items:center; gap:6px; font-size:10.5px; color:var(--ts); }
+  .conf .bar{ width:52px; height:4px; border-radius:100px; background:rgba(255,255,255,.1); overflow:hidden; }
+  .conf .bar i{ display:block; height:100%; background:linear-gradient(90deg,#6a6a72,#f2f2f5); }
+  .grid3{ display:grid; grid-template-columns:1.05fr 1.35fr 1fr; gap:16px; align-items:start; }
+  @media (max-width:1200px){ .grid3{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:860px){ .grid3{ grid-template-columns:1fr; } }
+  /* 客户卡 */
+  .client-strip{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .client-avatar{ width:52px; height:52px; border-radius:16px; display:grid; place-items:center; font-size:16px; font-weight:800; color:#050506;
+    background:linear-gradient(135deg,#dfeaff,#8fbcff); box-shadow:inset 0 1px 2px rgba(255,255,255,.7); }
+  .client-name{ font-size:16px; font-weight:800; }
+  .ctag{ font-size:10px; font-weight:700; padding:2px 9px; border-radius:100px; background:rgba(143,188,255,.14); color:var(--blue); border:1px solid rgba(143,188,255,.35); }
+  .ctag.mock{ background:rgba(255,171,102,.12); color:var(--orange); border-color:rgba(255,171,102,.4); }
+  /* 饼图 */
+  .donut-wrap{ display:flex; align-items:center; gap:18px; }
+  .donut-legend{ flex:1; display:flex; flex-direction:column; gap:8px; }
+  .dl-item{ display:flex; align-items:center; gap:9px; font-size:11.5px; }
+  .dl-sw{ width:11px; height:11px; border-radius:4px; flex-shrink:0; }
+  .dl-item .n{ flex:1; } .dl-item .v{ font-weight:700; }
+  /* 表 */
+  table{ width:100%; border-collapse:collapse; font-size:12px; }
+  th{ text-align:left; color:var(--ts); font-size:10.5px; font-weight:600; letter-spacing:.5px; padding:0 8px 9px; border-bottom:1px solid rgba(255,255,255,.08); }
+  td{ padding:10px 8px; border-bottom:1px solid rgba(255,255,255,.05); vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:rgba(255,255,255,.05); }
+  .num{ text-align:right; }
+  .up-t{ color:var(--up); font-weight:700; } .down-t{ color:var(--down); font-weight:700; } .mix-t{ color:var(--blue); font-weight:700; }
+  .wbar{ height:5px; border-radius:100px; background:rgba(255,255,255,.08); overflow:hidden; width:80px; margin-top:5px; }
+  .wbar i{ display:block; height:100%; background:linear-gradient(90deg,#6a6a72,#f2f2f5); border-radius:inherit; }
+  .wbar.warn i{ background:linear-gradient(90deg,#8a5a30,#ffab66); }
+  /* 指标 */
+  .metrics{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .metric{ padding:14px 16px; border-radius:16px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); }
+  .metric.warn{ border-color:rgba(255,171,102,.45); background:rgba(255,171,102,.06); }
+  .metric .k{ font-size:10.5px; color:var(--ts); }
+  .metric .v{ font-size:21px; font-weight:800; margin-top:6px; letter-spacing:-.5px; }
+  .metric .s{ font-size:10px; margin-top:5px; color:var(--ts); }
+  .metric.warn .s{ color:var(--orange); }
+  /* 方案对比 */
+  .plan-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  @media (max-width:1100px){ .plan-grid{ grid-template-columns:1fr; } }
+  .plan{ padding:22px 24px; display:flex; flex-direction:column; }
+  .plan.rec{ border-color:rgba(143,188,255,.5); }
+  .plan-head{ display:flex; justify-content:space-between; align-items:center; }
+  .plan-name{ font-size:15px; font-weight:800; }
+  .plan ul{ margin:12px 0 0; font-size:11.5px; line-height:1.8; color:rgba(255,255,255,.85); }
+  .plan li{ margin-left:16px; }
+  .plan-kpi{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+  .pk{ background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:9px 12px; }
+  .pk .k{ font-size:9.5px; color:var(--ts); } .pk .v{ font-size:14px; font-weight:800; margin-top:3px; }
+  .pill-btn{ padding:10px 20px; border-radius:100px; border:1px solid var(--gb); background:rgba(255,255,255,.08);
+    color:var(--tp); font-size:12.5px; font-weight:600; cursor:pointer; }
+  .pill-btn.primary{ background:rgba(255,255,255,.94); color:#050506; }
+  .footbar{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 24px; flex-wrap:wrap; font-size:11px; color:var(--ts); }
+  .ai-badge{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:100px; font-size:10px; font-weight:800;
+    background:rgba(143,188,255,.12); color:var(--blue); border:1px solid rgba(143,188,255,.4); letter-spacing:.5px; }
+</style>
+</head>
+<body>
+
+<div class="proto-banner">
+  <b>金策 FinSight</b><span>·</span><span>产品原型（非上线产品）</span><span class="dotsep">·</span><span>数据为演示用模拟数据</span><span class="dotsep">·</span><span>方案仅为辅助建议，不自动执行</span>
+</div>
+
+<div class="aurora"><div class="orb o1"></div><div class="orb o2"></div></div>
+
+<div class="wrap">
+
+  <div class="topbar glass">
+    <div>
+      <h1>组合风险分析 · 加息情景压力测试</h1>
+      <div class="meta-row">
+        <span>持仓快照 2026-07-19 09:40 CST · 测算更新 09:52:41</span>
+        <span class="src">Portfolio Analyst · portfolio-v2</span>
+        <span class="src">持仓来源：模拟客户数据（已脱敏）</span>
+        <span class="ai-badge">AI 生成 · 待人工确认</span>
+        <span class="conf">测算置信度 <span class="bar"><i style="width:66%"></i></span>66%</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="pill-btn">导出底稿（含证据链）</button>
+      <button class="pill-btn primary">人工确认分析结果</button>
+    </div>
+  </div>
+
+  <!-- 客户档案条 -->
+  <div class="card glass">
+    <div class="client-strip">
+      <div class="client-avatar">A</div>
+      <div>
+        <div class="client-name">模拟客户A <span class="ctag mock" style="margin-left:6px;">模拟数据</span></div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:7px;">
+          <span class="ctag">稳健型</span><span class="ctag">风险等级 R3</span><span class="ctag">期限：中期（1–3年）</span><span class="ctag">流动性约束：低</span><span class="ctag">适当性：匹配 ✓</span>
+        </div>
+      </div>
+      <div style="margin-left:auto; display:flex; gap:26px; flex-wrap:wrap;">
+        <div><div style="font-size:10px; color:var(--ts);">总资产（模拟）</div><div style="font-size:20px; font-weight:800; margin-top:3px;">¥5,200,000</div></div>
+        <div><div style="font-size:10px; color:var(--ts);">悲观情景回撤预估</div><div class="down-t" style="font-size:20px; font-weight:800; margin-top:3px;">-4.2% <span style="font-size:11px;">≈ -¥218,400</span></div></div>
+        <div><div style="font-size:10px; color:var(--ts);">合规状态</div><div style="margin-top:5px;"><span class="st st-review"><i></i>集中度复核中</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3">
+
+    <!-- 持仓饼图 -->
+    <div class="card glass">
+      <div class="card-title">持仓结构 <span class="lv lv-fact">事实 · 持仓快照</span></div>
+      <div class="card-sub">数据更新 09:40 · 来源：模拟持仓（脱敏）<span class="evi" style="margin-left:6px;">[E15]</span></div>
+      <div class="donut-wrap">
+        <svg width="168" height="168" viewBox="0 0 42 42">
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="5"/>
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#f2f2f5" stroke-width="5" stroke-dasharray="38 62" stroke-dashoffset="25" stroke-linecap="round"/>
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#8fbcff" stroke-width="5" stroke-dasharray="22 78" stroke-dashoffset="-13" stroke-linecap="round"/>
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#9a9aa2" stroke-width="5" stroke-dasharray="14 86" stroke-dashoffset="-35" stroke-linecap="round"/>
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#ffab66" stroke-width="5" stroke-dasharray="10 90" stroke-dashoffset="-49" stroke-linecap="round"/>
+          <circle cx="21" cy="21" r="15.915" fill="none" stroke="#5a5a62" stroke-width="5" stroke-dasharray="16 84" stroke-dashoffset="-59" stroke-linecap="round"/>
+          <text x="21" y="20" text-anchor="middle" fill="#fff" font-size="6.5" font-weight="800">¥520万</text>
+          <text x="21" y="26.5" text-anchor="middle" fill="rgba(255,255,255,.5)" font-size="3">5 类资产</text>
+        </svg>
+        <div class="donut-legend">
+          <div class="dl-item"><span class="dl-sw" style="background:#f2f2f5"></span><span class="n">权益类（A股+美股QDII）</span><span class="v">38%</span></div>
+          <div class="dl-item"><span class="dl-sw" style="background:#8fbcff"></span><span class="n">固收类（利率债+信用债）</span><span class="v">22%</span></div>
+          <div class="dl-item"><span class="dl-sw" style="background:#9a9aa2"></span><span class="n">黄金（ETF+积存金）</span><span class="v">14%</span></div>
+          <div class="dl-item"><span class="dl-sw" style="background:#ffab66"></span><span class="n">美元资产（存款+货基）</span><span class="v">10%</span></div>
+          <div class="dl-item"><span class="dl-sw" style="background:#5a5a62"></span><span class="n">现金及其他</span><span class="v">16%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 持仓明细表 -->
+    <div class="card glass">
+      <div class="card-title">持仓明细 <span class="lv lv-risk">全部为模拟持仓</span></div>
+      <div class="card-sub">涨跌以明/暗灰阶区分 · 数据更新 09:40 CST</div>
+      <table>
+        <thead><tr><th>资产</th><th class="num">市值（¥）</th><th class="num">占比</th><th class="num">近1月</th><th>集中度</th></tr></thead>
+        <tbody>
+          <tr><td><b>沪深300ETF 联接</b></td><td class="num">1,040,000</td><td class="num">20.0%</td><td class="num down-t">-1.8%</td><td><div class="wbar"><i style="width:53%"></i></div></td></tr>
+          <tr><td><b>纳指QDII 基金</b></td><td class="num">936,000</td><td class="num">18.0%</td><td class="num up-t">+2.4%</td><td><div class="wbar"><i style="width:47%"></i></div></td></tr>
+          <tr><td><b>利率债基金</b></td><td class="num">728,000</td><td class="num">14.0%</td><td class="num up-t">+0.6%</td><td><div class="wbar"><i style="width:37%"></i></div></td></tr>
+          <tr><td><b>黄金ETF</b></td><td class="num">520,000</td><td class="num">10.0%</td><td class="num up-t">+1.2%</td><td><div class="wbar"><i style="width:26%"></i></div></td></tr>
+          <tr><td><b>信用债基金</b></td><td class="num">416,000</td><td class="num">8.0%</td><td class="num up-t">+0.4%</td><td><div class="wbar"><i style="width:21%"></i></div></td></tr>
+          <tr><td><b>美元存款 / 货基</b></td><td class="num">520,000</td><td class="num">10.0%</td><td class="num up-t">+0.9%</td><td><div class="wbar"><i style="width:26%"></i></div></td></tr>
+          <tr><td><b>积存金</b></td><td class="num">208,000</td><td class="num">4.0%</td><td class="num up-t">+1.1%</td><td><div class="wbar"><i style="width:11%"></i></div></td></tr>
+          <tr><td><b>现金及其他</b></td><td class="num">832,000</td><td class="num">16.0%</td><td class="num">0.0%</td><td><div class="wbar"><i style="width:42%"></i></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 集中度与敞口 -->
+    <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
+      <div class="card glass">
+        <div class="card-title">集中度与风险敞口 <span class="lv lv-infer">推断</span></div>
+        <div class="card-sub">Portfolio Analyst 测算 · 经 Evidence Auditor 复核 <span class="evi">[E15]</span></div>
+        <div class="metrics">
+          <div class="metric warn"><div class="k">权益类集中度</div><div class="v">38%</div><div class="s">超 R3 内控关注线 35% · 触发人工复核</div></div>
+          <div class="metric"><div class="k">前三大持仓占比</div><div class="v">52%</div><div class="s">阈值 60% · 正常</div></div>
+          <div class="metric"><div class="k">美元资产敞口</div><div class="v">28%</div><div class="s">含 QDII 与美元存款 · 汇率敏感</div></div>
+          <div class="metric"><div class="k">利率敏感资产</div><div class="v">22%</div><div class="s">加息情景下相对受益（短久期为主）</div></div>
+          <div class="metric"><div class="k">组合 HHI</div><div class="v">0.147</div><div class="s">中等分散</div></div>
+          <div class="metric"><div class="k">黄金对冲占比</div><div class="v">14%</div><div class="s">与实际利率负相关敞口</div></div>
+        </div>
+      </div>
+
+      <!-- 压力测试 -->
+      <div class="card glass">
+        <div class="card-title">三情景压力测试 <span class="lv lv-infer">模型推断</span></div>
+        <div class="card-sub">联动因果推演页假设 · 测算置信度 66% <span class="evi">[E15]</span></div>
+        <table>
+          <thead><tr><th>情景</th><th class="num">组合盈亏</th><th class="num">回撤</th><th class="num">概率</th></tr></thead>
+          <tbody>
+            <tr><td>乐观 · 软着陆</td><td class="num up-t">+¥135,200</td><td class="num up-t">+2.6%</td><td class="num">20%</td></tr>
+            <tr><td><b>基准 · 再加 25bp</b></td><td class="num down-t">-¥62,400</td><td class="num down-t">-1.2%</td><td class="num">55%</td></tr>
+            <tr><td>悲观 · 紧缩超预期</td><td class="num down-t">-¥218,400</td><td class="num down-t">-4.2%</td><td class="num">25%</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:11px;"><span class="lv lv-risk">概率加权期望 -0.6% · 不构成收益预测</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 多方案对比 -->
+  <div class="card glass" style="padding:24px 26px;">
+    <div class="card-title">调整方案对比（辅助建议 · 不自动执行）
+      <span style="display:flex; gap:8px; align-items:center;"><span class="ai-badge">AI 生成内容</span><span class="st st-review"><i></i>待财富顾问 + 客户双重确认</span></span>
+    </div>
+    <div class="card-sub">所有方案均通过适当性与流动性检查；任何执行须客户书面同意并留痕</div>
+    <div class="plan-grid">
+
+      <div class="plan glass">
+        <div class="plan-head"><span class="plan-name">方案 A · 维持观察</span><span class="lv lv-view">保守</span></div>
+        <ul>
+          <li>不调整持仓，设置复核触发线</li>
+          <li>权益集中度触及 40% 时强制提示</li>
+          <li>每月随 CPI / FOMC 节点复检</li>
+        </ul>
+        <div class="plan-kpi">
+          <div class="pk"><div class="k">悲观情景回撤</div><div class="v down-t">-4.2%</div></div>
+          <div class="pk"><div class="k">调整成本</div><div class="v">无</div></div>
+          <div class="pk"><div class="k">适当性检查</div><div class="v up-t">通过</div></div>
+          <div class="pk"><div class="k">失效条件</div><div class="v" style="font-size:11px;">权益 ≥40%</div></div>
+        </div>
+        <div style="margin-top:auto; padding-top:14px; display:flex; gap:8px;">
+          <button class="pill-btn" style="flex:1;">加入备选</button>
+        </div>
+      </div>
+
+      <div class="plan glass rec">
+        <div class="plan-head"><span class="plan-name">方案 B · 温和再平衡</span><span class="lv lv-infer">建议关注</span></div>
+        <ul>
+          <li>权益 38% → 33%：减纳指 QDII 5%</li>
+          <li>增配短久期利率债 3%、黄金 2%</li>
+          <li>美元存款到期后部分转人民币短债</li>
+        </ul>
+        <div class="plan-kpi">
+          <div class="pk"><div class="k">悲观情景回撤</div><div class="v down-t">-3.1%</div></div>
+          <div class="pk"><div class="k">基准情景影响</div><div class="v down-t">-0.9%</div></div>
+          <div class="pk"><div class="k">适当性检查</div><div class="v up-t">通过 · 匹配 R3</div></div>
+          <div class="pk"><div class="k">流动性影响</div><div class="v up-t">低</div></div>
+        </div>
+        <div style="margin-top:12px;"><span class="lv lv-risk">提示：再平衡存在交易摩擦与踏空风险，附完整风险提示书</span></div>
+        <div style="margin-top:12px; display:flex; gap:8px;">
+          <button class="pill-btn primary" style="flex:1;">人工确认采纳</button>
+        </div>
+      </div>
+
+      <div class="plan glass">
+        <div class="plan-head"><span class="plan-name">方案 C · 显著防御</span><span class="lv lv-view">谨慎</span></div>
+        <ul>
+          <li>权益 38% → 25%，增配利率债与现金</li>
+          <li>黄金维持 14%，作为尾部风险对冲</li>
+          <li>适合判断悲观情景概率显著上升时</li>
+        </ul>
+        <div class="plan-kpi">
+          <div class="pk"><div class="k">悲观情景回撤</div><div class="v down-t">-2.2%</div></div>
+          <div class="pk"><div class="k">乐观情景机会成本</div><div class="v down-t">少涨约 1.8%</div></div>
+          <div class="pk"><div class="k">适当性检查</div><div class="v up-t">通过</div></div>
+          <div class="pk"><div class="k">调整成本</div><div class="v">中等</div></div>
+        </div>
+        <div style="margin-top:auto; padding-top:14px; display:flex; gap:8px;">
+          <button class="pill-btn" style="flex:1;">加入备选</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footbar glass">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <span class="st st-review"><i></i>合规状态：分析完成 · 集中度复核待人工确认 · 方案未执行</span>
+      <span>审计：测算参数 · 模型版本 portfolio-v2 · 操作日志已留痕</span>
+      <span style="color:var(--down);">风险提示：历史与模拟测算不代表未来表现；任何调整须客户同意，不构成收益承诺。</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <span class="lv lv-fact">事实</span><span class="lv lv-view">观点/共识</span><span class="lv lv-infer">推断/假设</span><span class="lv lv-risk">风险提示</span>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
