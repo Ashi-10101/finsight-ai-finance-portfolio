@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>群消息卡片 · 金策 FinSight（产品原型）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:-apple-system,"Helvetica Neue","PingFang SC",sans-serif; background:#f5f6f7; color:#1f2329; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  .proto-badge{ position:fixed; top:12px; right:14px; z-index:100; padding:4px 12px; border-radius:100px;
+    background:#fff; border:1px solid #ffab66; color:#d96f00; font-size:11px; font-weight:700; letter-spacing:.5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  /* 飞书窗口框架 */
+  .fs-window{ max-width:960px; margin:28px auto; background:#fff; border:1px solid #dee0e3; border-radius:12px; overflow:hidden;
+    box-shadow:0 8px 28px rgba(31,35,41,.08); }
+  .fs-titlebar{ height:40px; background:#f7f8fa; border-bottom:1px solid #ebedf0; display:flex; align-items:center; gap:8px; padding:0 14px; }
+  .tl-dot{ width:11px; height:11px; border-radius:50%; }
+  .fs-body{ display:flex; min-height:640px; }
+  /* 会话列表 */
+  .fs-side{ width:220px; border-right:1px solid #ebedf0; background:#fafbfc; padding:10px 8px; }
+  .fs-search{ height:30px; border-radius:6px; background:#eff0f1; color:#8f959e; font-size:12px; display:flex; align-items:center; padding:0 10px; margin-bottom:10px; }
+  .conv{ display:flex; gap:9px; padding:9px 8px; border-radius:8px; align-items:center; }
+  .conv.active{ background:#e6efff; }
+  .conv .avatar{ width:34px; height:34px; border-radius:8px; flex-shrink:0; display:grid; place-items:center; color:#fff; font-size:13px; font-weight:700; }
+  .conv .n{ font-size:13px; font-weight:600; }
+  .conv .p{ font-size:11px; color:#8f959e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px; }
+  /* 聊天区 */
+  .fs-chat{ flex:1; display:flex; flex-direction:column; }
+  .chat-header{ height:52px; border-bottom:1px solid #ebedf0; display:flex; align-items:center; padding:0 18px; gap:10px; }
+  .chat-header .name{ font-size:14px; font-weight:700; }
+  .chat-header .cnt{ font-size:11px; color:#8f959e; }
+  .chat-flow{ flex:1; padding:18px 22px; background:#fff; }
+  .msg{ display:flex; gap:10px; margin-bottom:20px; }
+  .msg .avatar{ width:36px; height:36px; border-radius:8px; flex-shrink:0; display:grid; place-items:center; color:#fff; font-size:12px; font-weight:700; }
+  .msg .who{ font-size:11px; color:#8f959e; margin-bottom:5px; }
+  .bubble{ background:#f5f6f7; border-radius:4px 12px 12px 12px; padding:10px 14px; font-size:13px; line-height:1.65; max-width:520px; }
+  /* 机器人消息卡片 */
+  .bot-card{ width:460px; max-width:100%; border:1px solid #bfd4ff; border-radius:4px 12px 12px 12px; overflow:hidden; background:#fff;
+    box-shadow:0 2px 10px rgba(51,112,255,.08); }
+  .bc-head{ background:linear-gradient(90deg,#3370FF,#5b8cff); color:#fff; padding:10px 14px; }
+  .bc-head .t{ font-size:13.5px; font-weight:700; }
+  .bc-head .s{ font-size:10.5px; opacity:.85; margin-top:2px; }
+  .bc-sec{ padding:11px 14px; border-bottom:1px solid #f0f1f5; }
+  .bc-sec:last-of-type{ border-bottom:none; }
+  .bc-label{ font-size:10.5px; color:#3370FF; font-weight:700; margin-bottom:5px; letter-spacing:.5px; }
+  .bc-text{ font-size:12.5px; line-height:1.7; color:#1f2329; }
+  .bc-text b{ color:#3370FF; }
+  .bc-kv{ display:flex; gap:8px; font-size:11.5px; color:#646a73; line-height:1.8; }
+  .bc-kv .k{ color:#8f959e; flex-shrink:0; }
+  .anchor-chip{ display:inline-block; padding:1px 7px; border-radius:4px; background:#fff3e0; border:1px solid #ffd591; color:#d96f00; font-size:10.5px; font-weight:600; margin:2px 2px 0 0; }
+  .expiry{ background:#fff8e6; border:1px dashed #e8b23a; border-radius:8px; padding:8px 10px; font-size:11.5px; color:#8a6d1a; line-height:1.6; }
+  .bc-actions{ display:flex; border-top:1px solid #ebedf0; }
+  .bc-actions button{ flex:1; padding:11px 0; border:none; background:#fff; color:#3370FF; font-size:13px; font-weight:600; cursor:pointer; }
+  .bc-actions button:first-child{ border-right:1px solid #ebedf0; }
+  .bc-actions button:hover{ background:#f0f6ff; }
+  .bc-actions button.primary{ background:#3370FF; color:#fff; }
+  .bc-actions button.primary:hover{ background:#295ccc; }
+  .chat-input{ border-top:1px solid #ebedf0; padding:12px 18px; display:flex; gap:10px; align-items:center; }
+  .chat-input .box{ flex:1; height:36px; border:1px solid #dee0e3; border-radius:8px; display:flex; align-items:center; padding:0 12px; color:#bbbfc4; font-size:12.5px; }
+  .chat-input .send{ padding:8px 18px; border-radius:8px; background:#3370FF; color:#fff; font-size:12.5px; font-weight:600; border:none; }
+  .note{ max-width:960px; margin:0 auto 28px; padding:0 4px; font-size:11px; color:#8f959e; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="proto-badge">产品原型 · 模拟数据</div>
+
+<div class="fs-window">
+  <div class="fs-titlebar">
+    <span class="tl-dot" style="background:#f96b5d;"></span>
+    <span class="tl-dot" style="background:#f7bd4a;"></span>
+    <span class="tl-dot" style="background:#39c26e;"></span>
+    <span style="font-size:11.5px; color:#8f959e; margin-left:6px;">飞书</span>
+  </div>
+  <div class="fs-body">
+    <div class="fs-side">
+      <div class="fs-search">搜索</div>
+      <div class="conv active">
+        <div class="avatar" style="background:#3370FF;">财</div>
+        <div><div class="n">财富工作室·顾问群</div><div class="p">[机器人] 降准解读卡</div></div>
+      </div>
+      <div class="conv">
+        <div class="avatar" style="background:#7a5af8;">产</div>
+        <div><div class="n">产品发行通知群</div><div class="p">本周在售产品清单…</div></div>
+      </div>
+      <div class="conv">
+        <div class="avatar" style="background:#12a182;">合</div>
+        <div><div class="n">合规与审批</div><div class="p">您有 1 条待办审批</div></div>
+      </div>
+    </div>
+
+    <div class="fs-chat">
+      <div class="chat-header">
+        <div class="name">财富工作室·顾问群</div>
+        <div class="cnt">7 人 · 含机器人「金策 FinSight」</div>
+      </div>
+      <div class="chat-flow">
+
+        <div class="msg">
+          <div class="avatar" style="background:#3370FF;">金</div>
+          <div>
+            <div class="who">金策 FinSight 机器人 · 周一 09:07</div>
+            <div class="bot-card">
+              <div class="bc-head">
+                <div class="t">资讯解读卡 · 央行降准 0.5 个百分点</div>
+                <div class="s">来源：资讯研报库 V-ZX001 · 证据截止时间 T0+1h（模拟）</div>
+              </div>
+              <div class="bc-sec">
+                <div class="bc-label">事件摘要</div>
+                <div class="bc-text">周一 9:05，央行公告下调金融机构存款准备金率 <b>0.5 个百分点</b>，释放长期流动性约 <b>X 万亿元</b>（示例数值，待核对公告原文）。</div>
+              </div>
+              <div class="bc-sec">
+                <div class="bc-label">影响方向（观点库 G01 / G02）</div>
+                <div class="bc-text">债券类底层：<b>偏正面</b>（利率下行动力）<br>权益类：<b>偏正面</b>（流动性改善，强度取决于盈利预期）<br>货币类：收益或缓慢走低</div>
+              </div>
+              <div class="bc-sec">
+                <div class="bc-label">来源与发布时间</div>
+                <div class="bc-kv"><span class="k">来源机构</span><span>中国人民银行官网（模拟来源）</span></div>
+                <div class="bc-kv"><span class="k">发布时间</span><span>周一 09:05（T0）</span></div>
+                <div class="bc-kv"><span class="k">入库时间</span><span>周一 09:06</span></div>
+              </div>
+              <div class="bc-sec">
+                <div class="bc-label">失效条件（满足任一即触发重审）</div>
+                <div class="expiry">通胀数据连续超预期 · 央行后续表态转向中性 · 落地后收益率不降反升（利好出尽）</div>
+              </div>
+              <div class="bc-sec">
+                <div class="bc-label">证据锚点</div>
+                <span class="anchor-chip">[E1] 公告原文 第1段 · T0</span>
+                <span class="anchor-chip">[E3] 债市行情快照 · T0+1h</span>
+                <span class="anchor-chip">[E5] 机构评论 · T0+1d</span>
+              </div>
+              <div class="bc-actions">
+                <button>查看依据</button>
+                <button class="primary">生成分组话术</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="msg">
+          <div class="avatar" style="background:#e8a33d;">顾</div>
+          <div>
+            <div class="who">顾问 · 周一 09:08</div>
+            <div class="bubble">收到。先核对 [E1] 原文，确认后我再点「生成分组话术」。</div>
+          </div>
+        </div>
+
+      </div>
+      <div class="chat-input">
+        <div class="box">输入消息，@金策 FinSight 可触发查询…</div>
+        <button class="send">发送</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="note">本页面为产品原型演示：机器人群消息卡片形态取自飞书群聊场景（飞书群机器人与消息卡片能力待实测确认）。页面中全部事件、数据与对话均为模拟数据，不构成投资建议。</p>
+
+</body>
+</html>

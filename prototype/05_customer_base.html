@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>客户库分层视图 · 多维表格（产品原型）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:-apple-system,"Helvetica Neue","PingFang SC",sans-serif; background:#f5f6f7; color:#1f2329; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  .proto-badge{ position:fixed; top:12px; right:14px; z-index:100; padding:4px 12px; border-radius:100px;
+    background:#fff; border:1px solid #ffab66; color:#d96f00; font-size:11px; font-weight:700; letter-spacing:.5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  .fs-window{ max-width:1240px; margin:28px auto; background:#fff; border:1px solid #dee0e3; border-radius:12px; overflow:hidden;
+    box-shadow:0 8px 28px rgba(31,35,41,.08); }
+  .base-head{ padding:14px 20px; border-bottom:1px solid #ebedf0; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .base-ico{ width:30px; height:30px; border-radius:7px; background:#3370FF; color:#fff; display:grid; place-items:center; font-size:14px; font-weight:800; }
+  .base-name{ font-size:15px; font-weight:700; }
+  .base-path{ font-size:11px; color:#8f959e; }
+  .mask-note{ margin-left:auto; font-size:11px; color:#d96f00; background:#fff8e6; border:1px dashed #e8b23a; border-radius:6px; padding:4px 10px; }
+  /* 分组统计卡 */
+  .groups{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; padding:16px 20px; border-bottom:1px solid #ebedf0; }
+  @media (max-width:900px){ .groups{ grid-template-columns:repeat(2,1fr); } }
+  .gcard{ border:1px solid #dee0e3; border-radius:10px; padding:14px 16px; background:#fff; }
+  .gcard .g-name{ font-size:12px; font-weight:700; color:#1f2329; }
+  .gcard .g-rule{ font-size:10.5px; color:#8f959e; margin-top:3px; }
+  .gcard .g-num{ font-size:28px; font-weight:800; color:#3370FF; margin-top:8px; letter-spacing:-1px; }
+  .gcard .g-num span{ font-size:12px; color:#8f959e; font-weight:500; letter-spacing:0; }
+  .gcard.g1{ border-top:3px solid #3370FF; }
+  .gcard.g2{ border-top:3px solid #7a5af8; }
+  .gcard.g3{ border-top:3px solid #12a182; }
+  .gcard.g4{ border-top:3px solid #e8a33d; }
+  .sumline{ display:flex; gap:18px; padding:10px 20px; border-bottom:1px solid #ebedf0; font-size:11.5px; color:#646a73; flex-wrap:wrap; }
+  .sumline b{ color:#1f2329; }
+  .toolbar{ display:flex; align-items:center; gap:10px; padding:10px 20px; border-bottom:1px solid #ebedf0; flex-wrap:wrap; }
+  .tool-btn{ padding:6px 14px; border-radius:6px; border:1px solid #dee0e3; background:#fff; font-size:12px; cursor:pointer; }
+  .tool-btn.primary{ background:#3370FF; border-color:#3370FF; color:#fff; font-weight:600; }
+  .perm{ margin-left:auto; font-size:11px; color:#8f959e; }
+  .grid-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:12px; }
+  th{ background:#f7f8fa; text-align:left; padding:9px 12px; font-weight:600; color:#646a73; border-bottom:1px solid #ebedf0; white-space:nowrap; font-size:11.5px; }
+  th .coltag{ display:inline-block; margin-left:5px; padding:0 5px; border-radius:3px; font-size:9.5px; font-weight:700; vertical-align:1px; background:#fff0e0; color:#d96f00; }
+  td{ padding:9px 12px; border-bottom:1px solid #f0f1f5; vertical-align:top; line-height:1.6; }
+  tr:hover td{ background:#fafbfd; }
+  td.ext{ background:#fffaf3; }
+  .chip{ display:inline-block; padding:1px 8px; border-radius:4px; font-size:10.5px; font-weight:600; }
+  .r23{ background:#e6efff; color:#3370FF; }
+  .r45{ background:#fff0e0; color:#d96f00; }
+  .g1c{ background:#e6efff; color:#3370FF; }
+  .g2c{ background:#efe8ff; color:#7a5af8; }
+  .g3c{ background:#e0f5f0; color:#12a182; }
+  .g4c{ background:#fdf0dd; color:#b97916; }
+  .advisor{ display:inline-flex; align-items:center; gap:6px; }
+  .advisor .av{ width:18px; height:18px; border-radius:5px; background:#3370FF; color:#fff; font-size:9px; display:grid; place-items:center; font-weight:700; }
+  .note{ max-width:1240px; margin:0 auto 28px; padding:0 4px; font-size:11px; color:#8f959e; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="proto-badge">产品原型 · 模拟数据</div>
+
+<div class="fs-window">
+  <div class="base-head">
+    <div class="base-ico">客</div>
+    <div>
+      <div class="base-name">客户库</div>
+      <div class="base-path">金策 FinSight · 多维表格（Base）· 字段设计见 docs/08 §五</div>
+    </div>
+    <div class="mask-note">脱敏约束：姓名 / 手机号 / 身份证号不设字段；金额为区间、持仓为类别（docs/07 §4.1）</div>
+  </div>
+
+  <div class="groups">
+    <div class="gcard g1">
+      <div class="g-name">第 1 组 · 稳健持有固收+</div>
+      <div class="g-rule">R2–R3 × 持仓类别含固收+</div>
+      <div class="g-num">140 <span>人</span></div>
+    </div>
+    <div class="gcard g2">
+      <div class="g-name">第 2 组 · 积极持有固收+</div>
+      <div class="g-rule">R4–R5 × 持仓类别含固收+</div>
+      <div class="g-num">40 <span>人</span></div>
+    </div>
+    <div class="gcard g3">
+      <div class="g-name">第 3 组 · 稳健未持有</div>
+      <div class="g-rule">R2–R3 × 持仓类别不含固收+</div>
+      <div class="g-num">150 <span>人</span></div>
+    </div>
+    <div class="gcard g4">
+      <div class="g-name">第 4 组 · 积极未持有</div>
+      <div class="g-rule">R4–R5 × 持仓类别不含固收+</div>
+      <div class="g-num">70 <span>人</span></div>
+    </div>
+  </div>
+  <div class="sumline">
+    <span>合计 <b>400</b> 人</span>
+    <span>持有固收+ <b>180</b> 人（第 1、2 组）</span>
+    <span>分层规则：风险等级 × 是否持有固收+（与两份 samples 完全一致）</span>
+  </div>
+
+  <div class="toolbar">
+    <button class="tool-btn primary">按分组标签筛选</button>
+    <button class="tool-btn">按所属顾问筛选</button>
+    <div class="perm">当前账号：顾问 · 仅可见自己名下的客户记录（记录级权限，待实测确认）</div>
+  </div>
+
+  <div class="grid-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>客户代号</th>
+          <th>风险等级</th>
+          <th>投资期限</th>
+          <th>流动性约束</th>
+          <th>持仓金额区间</th>
+          <th>持仓明细类别</th>
+          <th>所属顾问</th>
+          <th>分组标签<span class="coltag">外挂</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>客户 A-001</td><td><span class="chip r23">R2</span></td><td>1–3 年</td><td>6 个月内可变现 ≥ 20%</td><td>100–300 万</td><td>固收+为主</td><td><span class="advisor"><span class="av">顾</span>顾问 01</span></td><td class="ext"><span class="chip g1c">第 1 组</span></td></tr>
+        <tr><td>客户 A-002</td><td><span class="chip r23">R3</span></td><td>3 年以上</td><td>无特殊约束</td><td>300–500 万</td><td>固收+为主</td><td><span class="advisor"><span class="av">顾</span>顾问 01</span></td><td class="ext"><span class="chip g1c">第 1 组</span></td></tr>
+        <tr><td>客户 B-014</td><td><span class="chip r45">R4</span></td><td>3 年以上</td><td>无特殊约束</td><td>500 万以上</td><td>固收+与权益均衡</td><td><span class="advisor"><span class="av" style="background:#7a5af8;">顾</span>顾问 02</span></td><td class="ext"><span class="chip g2c">第 2 组</span></td></tr>
+        <tr><td>客户 A-007</td><td><span class="chip r23">R2</span></td><td>1 年内</td><td>3 个月内可变现 ≥ 30%</td><td>50–100 万</td><td>货币类为主</td><td><span class="advisor"><span class="av">顾</span>顾问 01</span></td><td class="ext"><span class="chip g3c">第 3 组</span></td></tr>
+        <tr><td>客户 C-003</td><td><span class="chip r23">R3</span></td><td>1–3 年</td><td>无特殊约束</td><td>100–300 万</td><td>纯债类为主</td><td><span class="advisor"><span class="av" style="background:#12a182;">顾</span>顾问 03</span></td><td class="ext"><span class="chip g3c">第 3 组</span></td></tr>
+        <tr><td>客户 B-021</td><td><span class="chip r45">R5</span></td><td>3 年以上</td><td>无特殊约束</td><td>500 万以上</td><td>权益类为主</td><td><span class="advisor"><span class="av" style="background:#7a5af8;">顾</span>顾问 02</span></td><td class="ext"><span class="chip g4c">第 4 组</span></td></tr>
+        <tr><td>客户 D-009</td><td><span class="chip r45">R4</span></td><td>1–3 年</td><td>无特殊约束</td><td>300–500 万</td><td>权益类为主</td><td><span class="advisor"><span class="av" style="background:#e8a33d;">顾</span>顾问 04</span></td><td class="ext"><span class="chip g4c">第 4 组</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p class="note">本页面为产品原型演示：客户库严格执行脱敏规则——<b>不含姓名、手机号、身份证号任何一列</b>；持仓金额只存区间，持仓明细只存类别；真实身份与代号的映射留在机构自有台账，不进入飞书。「分组标签」列由自研外挂按分层规则写入（橙底）。分组人数 140 / 40 / 150 / 70 与 samples/话术样本.md、samples/数据分析与报告样本.md 完全一致。全部数据为模拟数据。</p>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>话术送审与审批流 · 金策 FinSight（产品原型）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:-apple-system,"Helvetica Neue","PingFang SC",sans-serif; background:#f5f6f7; color:#1f2329; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  .proto-badge{ position:fixed; top:12px; right:14px; z-index:100; padding:4px 12px; border-radius:100px;
+    background:#fff; border:1px solid #ffab66; color:#d96f00; font-size:11px; font-weight:700; letter-spacing:.5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  .fs-window{ max-width:1240px; margin:28px auto; background:#fff; border:1px solid #dee0e3; border-radius:12px; overflow:hidden;
+    box-shadow:0 8px 28px rgba(31,35,41,.08); }
+  .appr-head{ padding:14px 20px; border-bottom:1px solid #ebedf0; display:flex; align-items:center; gap:12px; }
+  .base-ico{ width:30px; height:30px; border-radius:7px; background:#3370FF; color:#fff; display:grid; place-items:center; font-size:14px; font-weight:800; }
+  .base-name{ font-size:15px; font-weight:700; }
+  .base-path{ font-size:11px; color:#8f959e; }
+  .cols{ display:grid; grid-template-columns:1fr 1.15fr 1fr; gap:0; }
+  @media (max-width:1000px){ .cols{ grid-template-columns:1fr; } }
+  .col{ padding:18px; border-right:1px solid #ebedf0; }
+  .col:last-child{ border-right:none; }
+  .col-title{ font-size:12px; font-weight:700; color:#646a73; margin-bottom:12px; letter-spacing:.5px; display:flex; align-items:center; gap:8px; }
+  .num-badge{ width:18px; height:18px; border-radius:50%; background:#3370FF; color:#fff; font-size:10.5px; display:grid; place-items:center; font-weight:700; }
+  /* 待审批话术卡 */
+  .ok-card{ border:1px solid #bfd4ff; border-radius:10px; overflow:hidden; }
+  .ok-head{ background:linear-gradient(90deg,#3370FF,#5b8cff); color:#fff; padding:10px 14px; font-size:12.5px; font-weight:700; }
+  .ok-head .s{ font-size:10px; opacity:.85; font-weight:400; margin-top:2px; }
+  .ok-body{ padding:12px 14px; font-size:12.5px; line-height:1.8; }
+  .placeholder{ background:#f0f6ff; border:1px solid #bfd4ff; border-radius:4px; padding:0 5px; color:#3370FF; font-weight:600; font-size:11.5px; }
+  .risk-block{ margin:12px 14px; padding:10px 12px; background:#fff8e6; border:1px solid #e8b23a; border-radius:8px; font-size:11px; color:#8a6d1a; line-height:1.7; }
+  .risk-block b{ display:block; margin-bottom:4px; }
+  .ok-meta{ padding:10px 14px; border-top:1px solid #f0f1f5; font-size:10.5px; color:#8f959e; line-height:1.9; }
+  .ok-meta .anchor{ display:inline-block; padding:1px 7px; border-radius:4px; background:#fff3e0; border:1px solid #ffd591; color:#d96f00; font-weight:600; }
+  .ok-actions{ display:flex; border-top:1px solid #ebedf0; }
+  .ok-actions button{ flex:1; padding:11px 0; border:none; background:#fff; font-size:12.5px; font-weight:600; cursor:pointer; }
+  .ok-actions .approve{ background:#3370FF; color:#fff; }
+  .ok-actions .reject{ color:#d83931; border-left:1px solid #ebedf0; }
+  /* 拦截反例卡 —— 核心 */
+  .block-card{ border:2px solid #d83931; border-radius:10px; overflow:hidden; box-shadow:0 6px 20px rgba(216,57,49,.14); }
+  .block-head{ background:#d83931; color:#fff; padding:10px 14px; font-size:12.5px; font-weight:700; display:flex; justify-content:space-between; align-items:center; }
+  .block-head .from{ font-size:10px; font-weight:400; opacity:.9; }
+  .block-draft{ padding:11px 14px; background:#fff5f5; border-bottom:1px dashed #ffb3b3; font-size:12px; line-height:1.8; color:#646a73; }
+  .block-draft .hit{ background:#ffe1e1; border-bottom:2px solid #d83931; color:#d83931; font-weight:700; padding:0 2px; }
+  .intercept{ padding:12px 14px; }
+  .intercept .src{ font-size:10px; color:#d96f00; font-weight:700; letter-spacing:.5px; margin-bottom:8px; }
+  .i-table{ width:100%; border-collapse:collapse; font-size:11.5px; }
+  .i-table th{ text-align:left; background:#fff5f5; color:#d83931; padding:6px 9px; font-size:10.5px; border-bottom:1px solid #ffd6d6; white-space:nowrap; }
+  .i-table td{ padding:7px 9px; border-bottom:1px solid #f5e3e3; vertical-align:top; line-height:1.65; }
+  .rule-id{ display:inline-block; padding:1px 7px; border-radius:4px; background:#d83931; color:#fff; font-size:10px; font-weight:700; margin:1px 2px 1px 0; }
+  .i-action{ margin:0 14px 12px; padding:10px 12px; background:#fff8e6; border:1px solid #e8b23a; border-radius:8px; font-size:11px; color:#8a6d1a; line-height:1.7; }
+  .i-why{ margin:0 14px 12px; font-size:10.5px; color:#646a73; line-height:1.75; border-left:3px solid #d83931; padding-left:10px; }
+  .block-status{ padding:10px 14px; border-top:1px solid #ffd6d6; font-size:11px; color:#d83931; font-weight:700; }
+  /* 审批留痕 */
+  .trace-item{ display:flex; gap:11px; margin-bottom:16px; }
+  .trace-item .dot{ width:10px; height:10px; border-radius:50%; margin-top:4px; flex-shrink:0; }
+  .d-blue{ background:#3370FF; }
+  .d-green{ background:#0d8a5f; }
+  .d-red{ background:#d83931; }
+  .d-gray{ background:#bbbfc4; }
+  .trace-body{ flex:1; font-size:12px; line-height:1.7; }
+  .trace-body .who{ font-weight:700; }
+  .trace-body .time{ font-size:10.5px; color:#8f959e; }
+  .stamp{ display:inline-block; margin-top:6px; padding:3px 10px; border-radius:6px; border:1.5px solid #0d8a5f; color:#0d8a5f; font-size:11px; font-weight:800; transform:rotate(-3deg); }
+  .stamp.pending{ border-color:#e8a33d; color:#b97916; }
+  .note{ max-width:1240px; margin:0 auto 28px; padding:0 4px; font-size:11px; color:#8f959e; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="proto-badge">产品原型 · 模拟数据</div>
+
+<div class="fs-window">
+  <div class="appr-head">
+    <div class="base-ico">审</div>
+    <div>
+      <div class="base-name">话术送审与审批流</div>
+      <div class="base-path">金策 FinSight · 飞书审批 · 话术正文取自 samples/话术样本.md 样本 1 与样本 5（飞书审批能力待实测确认）</div>
+    </div>
+  </div>
+
+  <div class="cols">
+
+    <!-- ① 待审批话术 -->
+    <div class="col">
+      <div class="col-title"><span class="num-badge">1</span>待审批话术 · VX001（第 1 组）</div>
+      <div class="ok-card">
+        <div class="ok-head">
+          分组话术 · 第 1 组（稳健型 · 持有固收+，140 人）
+          <div class="s">关联观点 G01 / G02 · 关联产品 P01 · 称呼以占位符存储</div>
+        </div>
+        <div class="ok-body">
+          <span class="placeholder">{{客户称呼}}</span>您好，我是<span class="placeholder">{{顾问称呼}}</span>。今天一早央行宣布降准 0.5 个百分点，简单说就是银行手里的钱变多了。您持有的"安盈稳健 1 号"，这次降准对它的影响主要在两个地方：一是它底层大部分是债券，市场利率往下走，债券价格一般会受益；二是它有一小部分权益仓位，流动性宽松对股市通常也是偏暖的消息。总的来说，这次消息对您这只产品是偏正面的，您不需要做什么操作。具体到每只产品的净值变化还要看后续市场走势，有任何变化我第一时间跟您说。
+        </div>
+        <div class="risk-block">
+          <b>风险提示（不可折叠）</b>
+          市场有风险，投资须谨慎。过往表现不代表未来，我们不承诺任何收益，也不保证本金不受损失。以上为基于公开信息的解读，不构成投资建议；具体产品风险以产品法律文件为准。
+        </div>
+        <div class="ok-meta">
+          依据：观点库 G01、G02 · 产品库 P01<br>
+          证据锚点：<span class="anchor">[E1] 央行公告 第1段 · T0</span><br>
+          机检结果：外挂四 · 通过（未命中规则）
+        </div>
+        <div class="ok-actions">
+          <button class="approve">同意并签发</button>
+          <button class="reject">驳回</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 被拦截的反例 —— 核心 -->
+    <div class="col">
+      <div class="col-title"><span class="num-badge" style="background:#d83931;">2</span>被拦截的反例 · VX005-草稿</div>
+      <div class="block-card">
+        <div class="block-head">
+          拦截结果：拦截 · 不得进入审批流
+          <span class="from">外挂四 · 话术违规表述拦截</span>
+        </div>
+        <div class="block-draft">
+          {{客户称呼}}您好，央行今天降准了，这是实打实的利好。您持有的"安盈稳健 1 号"这次是赶上了，<span class="hit">预计能稳稳跑赢定期</span>，固收+本来<span class="hit">基本不会亏</span>，现在又有政策加持。<span class="hit">建议您今天就把活期里的钱转过来加一部分</span>，错过这波可惜。
+        </div>
+        <div class="intercept">
+          <div class="src">外挂四 · 拦截输出（结构化写入话术记录表）</div>
+          <table class="i-table">
+            <thead>
+              <tr><th>命中规则编号</th><th>命中片段</th><th>为什么拦</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="rule-id">R-01</span>收益承诺类</td>
+                <td>"预计能稳稳跑赢定期"</td>
+                <td>含收益比较与确定性收益暗示，属收益承诺类违规表述</td>
+              </tr>
+              <tr>
+                <td><span class="rule-id">R-02</span>保本稳赚类</td>
+                <td>"基本不会亏"</td>
+                <td>暗示本金无风险，属保本稳赚类违规表述</td>
+              </tr>
+              <tr>
+                <td><span class="rule-id">R-03</span>无依据建议类</td>
+                <td>"建议您今天就把活期里的钱转过来加一部分"</td>
+                <td>给出具体资金操作指令，且未绑定任何观点条目与适当性核对记录</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="i-why">
+          <b>为什么这不是关键词过滤</b>：片段 ③ 不含任何违规词，仍被拦下——拦它的理由是"给出具体资金操作指令且未绑定观点与适当性核对"。审批人看到的不是"系统觉得不行"，而是"系统拦在哪、为什么"。
+        </div>
+        <div class="i-action">
+          <b>处置建议</b>：删除片段 ①②；片段 ③ 改写为"如需调整，须先完成适当性核对"；补充关联观点条目与风险提示后重新送审；该话术不得进入审批流「待审批」状态。
+        </div>
+        <div class="block-status">当前状态：已拦截 · 未进入审批流 · 留痕可查</div>
+      </div>
+    </div>
+
+    <!-- ③ 审批留痕 -->
+    <div class="col">
+      <div class="col-title"><span class="num-badge" style="background:#0d8a5f;">3</span>审批留痕</div>
+
+      <div class="trace-item">
+        <span class="dot d-blue"></span>
+        <div class="trace-body">
+          <div><span class="who">顾问 01</span> 提交话术 VX001 送审（第 1 组 · 140 人）</div>
+          <div class="time">周一 09:42 · 飞书审批流</div>
+        </div>
+      </div>
+      <div class="trace-item">
+        <span class="dot d-red"></span>
+        <div class="trace-body">
+          <div><span class="who">外挂四</span> 拦截 VX005-草稿（命中 R-01 / R-02 / R-03）</div>
+          <div class="time">周一 09:43 · 机检前置 · 拦截理由已写入话术记录表</div>
+        </div>
+      </div>
+      <div class="trace-item">
+        <span class="dot d-green"></span>
+        <div class="trace-body">
+          <div><span class="who">持牌顾问（审批人）</span> 签发 VX001</div>
+          <div class="time">周一 09:51 · 审批意见：依据充分，同意发送</div>
+          <div><span class="stamp">已签发 · 09:51</span></div>
+        </div>
+      </div>
+      <div class="trace-item">
+        <span class="dot d-gray"></span>
+        <div class="trace-body">
+          <div><span class="who">待办</span> VX002–VX004（第 2–4 组）依次送审</div>
+          <div class="time">目标：4 组全部签发 ≤ 开盘后 60 分钟</div>
+          <div><span class="stamp pending">待审批</span></div>
+        </div>
+      </div>
+
+      <div style="font-size:10.5px; color:#8f959e; line-height:1.8; border-top:1px solid #f0f1f5; padding-top:12px;">
+        留痕字段（docs/08 §六）：拦截结果 · 拦截理由 · 审批状态 · 审批人 · 审批时间 · 发送时间。审批记录天然带责任人、时间戳与不可抵赖性（docs/07 §2.6）。
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="note">本页面为产品原型演示：飞书审批卡片形态（审批流能力待实测确认）。左段话术取自 samples/话术样本.md 样本 1，中段拦截反例取自样本 5——它证明系统的拦截不是简单关键词过滤，而是给出命中规则编号、命中片段、为什么拦、处置建议的可解释输出。全部内容均为模拟数据。</p>
+
+</body>
+</html>

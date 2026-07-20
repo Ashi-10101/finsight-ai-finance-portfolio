@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>观点库与失效重审 · 多维表格（产品原型）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body{ font-family:-apple-system,"Helvetica Neue","PingFang SC",sans-serif; background:#f5f6f7; color:#1f2329; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  .proto-badge{ position:fixed; top:12px; right:14px; z-index:100; padding:4px 12px; border-radius:100px;
+    background:#fff; border:1px solid #ffab66; color:#d96f00; font-size:11px; font-weight:700; letter-spacing:.5px;
+    box-shadow:0 2px 8px rgba(0,0,0,.06); }
+  .fs-window{ max-width:1280px; margin:28px auto; background:#fff; border:1px solid #dee0e3; border-radius:12px; overflow:hidden;
+    box-shadow:0 8px 28px rgba(31,35,41,.08); }
+  .base-head{ padding:14px 20px; border-bottom:1px solid #ebedf0; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .base-ico{ width:30px; height:30px; border-radius:7px; background:#3370FF; color:#fff; display:grid; place-items:center; font-size:14px; font-weight:800; }
+  .base-name{ font-size:15px; font-weight:700; }
+  .base-path{ font-size:11px; color:#8f959e; }
+  .toolbar{ display:flex; align-items:center; gap:10px; padding:10px 20px; border-bottom:1px solid #ebedf0; flex-wrap:wrap; }
+  .tool-btn{ padding:6px 14px; border-radius:6px; border:1px solid #dee0e3; background:#fff; font-size:12px; cursor:pointer; }
+  .tool-btn.primary{ background:#3370FF; border-color:#3370FF; color:#fff; font-weight:600; }
+  .legend{ margin-left:auto; display:flex; align-items:center; gap:14px; font-size:11px; color:#646a73; }
+  .legend .sw{ display:inline-flex; align-items:center; gap:5px; }
+  .legend .dot{ width:10px; height:10px; border-radius:3px; }
+  .dot-blue{ background:#3370FF; }
+  .dot-orange{ background:#ff7a00; }
+  .grid-wrap{ overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; font-size:12px; }
+  th{ background:#f7f8fa; text-align:left; padding:9px 12px; font-weight:600; color:#646a73; border-bottom:1px solid #ebedf0; white-space:nowrap; font-size:11.5px; }
+  th .coltag{ display:inline-block; margin-left:5px; padding:0 5px; border-radius:3px; font-size:9.5px; font-weight:700; vertical-align:1px; }
+  .coltag-ai{ background:#e6efff; color:#3370FF; }
+  .coltag-ext{ background:#fff0e0; color:#d96f00; }
+  td{ padding:10px 12px; border-bottom:1px solid #f0f1f5; vertical-align:top; line-height:1.6; }
+  td.ai{ background:#f6faff; }
+  td.ext{ background:#fffaf3; }
+  tr.flagged td{ background:#fffbf5; }
+  tr.flagged td.ext{ background:#ffefd9; }
+  .t-title{ font-weight:600; }
+  .chip{ display:inline-block; padding:1px 8px; border-radius:4px; font-size:10.5px; font-weight:600; }
+  .st-up{ background:#e8f6f0; color:#0d8a5f; }
+  .st-mid{ background:#f0f1f5; color:#646a73; }
+  .st-down{ background:#fff0f0; color:#d83931; }
+  .expiry-ok{ background:#e8f6f0; color:#0d8a5f; }
+  .expiry-review{ background:#fff0e0; color:#d96f00; border:1px solid #ffd591; }
+  .support{ background:#f0f6ff; color:#3370FF; }
+  .support-partial{ background:#fff8e6; color:#8a6d1a; }
+  .anchor{ display:inline-block; padding:1px 7px; border-radius:4px; background:#fff3e0; border:1px solid #ffd591; color:#d96f00; font-size:10.5px; font-weight:600; }
+  /* 重审提示条 */
+  .review-banner{ margin:14px 20px 0; padding:11px 14px; border:1px solid #ffd591; background:#fff8e6; border-radius:8px;
+    display:flex; gap:10px; align-items:flex-start; font-size:12px; color:#8a6d1a; line-height:1.7; }
+  .review-banner b{ color:#d96f00; }
+  .review-banner .tag{ flex-shrink:0; padding:2px 9px; border-radius:4px; background:#ff7a00; color:#fff; font-size:10.5px; font-weight:700; }
+  .note{ max-width:1280px; margin:0 auto 28px; padding:0 4px; font-size:11px; color:#8f959e; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="proto-badge">产品原型 · 模拟数据</div>
+
+<div class="fs-window">
+  <div class="base-head">
+    <div class="base-ico">观</div>
+    <div>
+      <div class="base-name">观点库</div>
+      <div class="base-path">金策 FinSight · 多维表格（Base）· 字段设计见 docs/08 §三</div>
+    </div>
+  </div>
+  <div class="toolbar">
+    <button class="tool-btn primary">+ 生成观点</button>
+    <button class="tool-btn">筛选：失效状态</button>
+    <button class="tool-btn">按立场分组</button>
+    <div class="legend">
+      <span class="sw"><span class="dot dot-blue"></span>蓝底列：飞书原生 AI 字段</span>
+      <span class="sw"><span class="dot dot-orange"></span>橙底列：自研外挂写入（外挂一 / 二 / 三）</span>
+    </div>
+  </div>
+
+  <div class="review-banner">
+    <span class="tag">失效重审</span>
+    <div><b>G03 失效条件已被触发</b>：新入库记录 V-ZX014（通胀数据，模拟）命中失效条件第 1 条「通胀数据连续超预期」。外挂二已将失效状态改写为「待重审」，绑定该观点的产品影响卡与话术草稿已同步标记「依据待重审」，暂停送审。请责任顾问复核。</div>
+  </div>
+
+  <div class="grid-wrap" style="margin-top:14px;">
+    <table>
+      <thead>
+        <tr>
+          <th>结论</th>
+          <th>立场</th>
+          <th>适用情景<span class="coltag coltag-ai">AI 字段</span></th>
+          <th>关键假设<span class="coltag coltag-ai">AI 字段</span></th>
+          <th>失效条件<span class="coltag coltag-ext">外挂二</span></th>
+          <th>失效状态<span class="coltag coltag-ext">外挂二</span></th>
+          <th>最后重审时间<span class="coltag coltag-ext">外挂二</span></th>
+          <th>引用支持判定<span class="coltag coltag-ext">外挂三</span></th>
+          <th>证据锚点<span class="coltag coltag-ext">外挂一</span></th>
+          <th>观点归属机构</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="t-title">G01 · 降准释放流动性，市场利率存在下行动力，对以债券为底层的产品偏正面</td>
+          <td><span class="chip st-up">利多</span></td>
+          <td class="ai">基本面平稳、通胀未超预期、宽松未被提前充分定价</td>
+          <td class="ai">释放资金投向债券等资产；无同期外部冲击覆盖</td>
+          <td class="ext">通胀连续超预期；央行表态转向中性；落地后收益率不降反升</td>
+          <td class="ext"><span class="chip expiry-ok">有效</span></td>
+          <td class="ext">T0+2h</td>
+          <td class="ext"><span class="chip support-partial">部分支持</span></td>
+          <td class="ext"><span class="anchor">[E1] 公告第1段 · T0</span></td>
+          <td>本机构（模拟）</td>
+        </tr>
+        <tr>
+          <td class="t-title">G02 · 流动性宽松对权益市场偏正面，强度取决于盈利预期</td>
+          <td><span class="chip st-up">利多</span></td>
+          <td class="ai">盈利预期未同步下修；无外部市场冲击</td>
+          <td class="ai">流动性改善传导至风险偏好</td>
+          <td class="ext">外部市场大幅波动；盈利预测集中下修</td>
+          <td class="ext"><span class="chip expiry-ok">有效</span></td>
+          <td class="ext">T0+2h</td>
+          <td class="ext"><span class="chip support">支持</span></td>
+          <td class="ext"><span class="anchor">[E5] 机构评论汇总 · T0+1d</span></td>
+          <td>本机构（模拟）</td>
+        </tr>
+        <tr class="flagged">
+          <td class="t-title">G03 · 通胀走势温和，不构成宽松约束</td>
+          <td><span class="chip st-mid">中性</span></td>
+          <td class="ai">通胀同比维持在市场一致预期区间内</td>
+          <td class="ai"> CPI 读数无连续超预期</td>
+          <td class="ext">通胀数据连续超预期</td>
+          <td class="ext"><span class="chip expiry-review">待重审 ⚠</span></td>
+          <td class="ext">T0+5d（刚触发）</td>
+          <td class="ext"><span class="chip support-partial">部分支持</span></td>
+          <td class="ext"><span class="anchor">[E4] 统计部门公告 · T0-6d</span></td>
+          <td>外部机构（模拟）</td>
+        </tr>
+        <tr>
+          <td class="t-title">G04 · 降准后货币市场利率中枢缓慢下移</td>
+          <td><span class="chip st-down">中性偏空</span></td>
+          <td class="ai">公开市场操作利率未同步上调</td>
+          <td class="ai">资金宽松传导至货币市场</td>
+          <td class="ext">公开市场操作利率上调</td>
+          <td class="ext"><span class="chip expiry-ok">有效</span></td>
+          <td class="ext">T0+2h</td>
+          <td class="ext"><span class="chip support">支持</span></td>
+          <td class="ext"><span class="anchor">[E3] 逆回购公告 · T0+25m</span></td>
+          <td>本机构（模拟）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<p class="note">本页面为产品原型演示：观点库的失效条件、失效状态、最后重审时间、引用支持判定、证据锚点五列均由自研外挂写入（外挂一/二/三，当前未实现，此处为设计样例；飞书侧能力待实测确认）。「待重审」行的完整重审记录样例见 samples/数据分析与报告样本.md 样本 6。全部数据为模拟数据。</p>
+
+</body>
+</html>
