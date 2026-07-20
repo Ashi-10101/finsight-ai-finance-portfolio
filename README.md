@@ -81,13 +81,13 @@ https://memomeld.com/finsight
 仓库内主要材料如下：
 
 内容	路径
-开题方案	pdfs/01_金策_FinSight_开题方案.pdf
-周子涵参赛简历	pdfs/02_周子涵_参赛简历.pdf
-AI 与金融科技项目作品集	pdfs/03_周子涵_AI与金融科技项目作品集.pdf
-行业与竞品研究	pdfs/04_金策_FinSight_行业与竞品研究.pdf
-技术架构与业务流程	docs/06_技术架构与业务流程.md
-评测方案	pdfs/金策_FinSight_评测方案.pdf
-数据分析与报告样稿	pdfs/金策_FinSight_数据分析与报告样本.pdf
+开题方案	docs/01_开题方案.md
+周子涵参赛简历	docs/02_参赛简历.md
+AI 与金融科技项目作品集	docs/03_项目作品集.md
+行业与竞品研究	docs/04_行业与竞品研究.md
+技术架构与业务流程	docs/05_技术架构与业务流程.md
+评测方案	docs/06_评测方案.md
+数据分析与报告样稿	samples/数据分析与报告样本.md
 产品原型入口	prototype/01_home.html
 
 ⸻
