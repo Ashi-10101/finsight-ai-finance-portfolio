@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金策 FinSight · 报告与合规审核（产品原型）</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  :root{
+    --gb:rgba(255,255,255,.14); --tp:rgba(255,255,255,.95); --ts:rgba(255,255,255,.5);
+    --up:#f2f2f5; --down:#8a8a92; --blue:#8fbcff; --orange:#ffab66;
+  }
+  body{ font-family:-apple-system,"SF Pro Display","Helvetica Neue","PingFang SC",sans-serif;
+    background:#050506; color:var(--tp); min-height:100vh; -webkit-font-smoothing:antialiased;
+    font-variant-numeric:tabular-nums; padding-top:46px; }
+  .aurora{ position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .orb{ position:absolute; border-radius:50%; filter:blur(110px); }
+  .o1{ width:55vmax; height:55vmax; opacity:.14; background:radial-gradient(circle at 30% 30%,#fff,transparent 70%); top:-25%; left:-15%; }
+  .o2{ width:45vmax; height:45vmax; opacity:.09; background:radial-gradient(circle at 60% 40%,#9a9aa5,transparent 72%); bottom:-25%; right:-8%; }
+  .glass{ position:relative; background:linear-gradient(135deg,rgba(255,255,255,.09),rgba(255,255,255,.03) 45%,rgba(255,255,255,.015));
+    backdrop-filter:blur(26px) saturate(140%); -webkit-backdrop-filter:blur(26px) saturate(140%);
+    border:1px solid var(--gb); border-radius:22px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.22); overflow:hidden; }
+  .glass::before{ content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(110% 55% at 18% -8%,rgba(255,255,255,.14),transparent 55%); }
+  .proto-banner{ position:fixed; top:0; left:0; right:0; z-index:100; height:46px;
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    background:rgba(8,8,10,.92); backdrop-filter:blur(16px);
+    border-bottom:1px solid rgba(255,171,102,.35); font-size:12px; letter-spacing:.5px; }
+  .proto-banner b{ color:var(--orange); font-weight:800; }
+  .proto-banner .dotsep{ color:var(--ts); }
+  .wrap{ position:relative; z-index:2; max-width:1440px; margin:0 auto; padding:22px; display:flex; flex-direction:column; gap:18px; }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:20px 26px; flex-wrap:wrap; gap:14px; }
+  h1{ font-size:21px; font-weight:800; letter-spacing:-.3px; }
+  .meta-row{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:8px; font-size:11.5px; color:var(--ts); }
+  .src{ display:inline-flex; align-items:center; gap:5px; padding:2px 9px; border-radius:100px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.1); font-size:10.5px; }
+  .lv{ display:inline-flex; align-items:center; padding:2px 9px; border-radius:100px; font-size:10px; font-weight:800; letter-spacing:.5px; }
+  .lv-fact{ background:rgba(255,255,255,.92); color:#050506; }
+  .lv-view{ background:rgba(143,188,255,.14); color:var(--blue); border:1px solid rgba(143,188,255,.4); }
+  .lv-infer{ background:rgba(255,171,102,.12); color:var(--orange); border:1px solid rgba(255,171,102,.4); }
+  .lv-risk{ background:rgba(255,255,255,.05); color:var(--down); border:1px dashed rgba(255,255,255,.25); }
+  .evi{ display:inline-flex; padding:1px 7px; border-radius:6px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); font-size:10px; font-weight:700; cursor:pointer; }
+  .st{ display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; padding:3px 10px; border-radius:100px; }
+  .st i{ width:6px; height:6px; border-radius:50%; }
+  .st-review{ background:rgba(255,171,102,.12); color:var(--orange); border:1px solid rgba(255,171,102,.4); }
+  .st-review i{ background:var(--orange); animation:pulse 1.4s infinite; }
+  .st-done{ background:rgba(255,255,255,.12); color:var(--up); border:1px solid rgba(255,255,255,.22); }
+  .st-done i{ background:var(--up); }
+  @keyframes pulse{ 50%{ opacity:.3; box-shadow:0 0 0 5px rgba(255,255,255,.12); } }
+  .card{ padding:22px 24px; }
+  .card-title{ font-size:15px; font-weight:700; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; }
+  .card-sub{ font-size:11px; color:var(--ts); margin-top:4px; margin-bottom:14px; }
+  .conf{ display:inline-flex; align-items:center; gap:6px; font-size:10.5px; color:var(--ts); }
+  .conf .bar{ width:52px; height:4px; border-radius:100px; background:rgba(255,255,255,.1); overflow:hidden; }
+  .conf .bar i{ display:block; height:100%; background:linear-gradient(90deg,#6a6a72,#f2f2f5); }
+  .ai-badge{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:100px; font-size:10px; font-weight:800;
+    background:rgba(143,188,255,.12); color:var(--blue); border:1px solid rgba(143,188,255,.4); letter-spacing:.5px; }
+  .grid{ display:grid; grid-template-columns:1fr 1fr 300px; gap:16px; align-items:start; }
+  @media (max-width:1250px){ .grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:860px){ .grid{ grid-template-columns:1fr; } }
+  /* 报告文档 */
+  .doc{ background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.09); border-radius:16px; padding:22px 24px; position:relative; }
+  .doc-mark{ position:absolute; top:14px; right:16px; }
+  .doc h2{ font-size:16px; font-weight:800; letter-spacing:-.2px; }
+  .doc .doc-meta{ font-size:10.5px; color:var(--ts); margin-top:6px; display:flex; gap:8px; flex-wrap:wrap; }
+  .doc h3{ font-size:12.5px; font-weight:800; margin:16px 0 8px; display:flex; align-items:center; gap:8px; }
+  .doc p{ font-size:12px; line-height:1.85; color:rgba(255,255,255,.82); margin-bottom:8px; }
+  .doc p .numv{ font-weight:800; color:var(--tp); }
+  .doc .riskbox{ margin-top:14px; padding:12px 14px; border-radius:12px; background:rgba(255,171,102,.06); border:1px dashed rgba(255,171,102,.4); font-size:11px; line-height:1.7; color:rgba(255,200,150,.9); }
+  .doc .footer-sign{ margin-top:16px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08); font-size:10.5px; color:var(--ts); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  table.rt{ width:100%; border-collapse:collapse; font-size:11.5px; margin-top:8px; }
+  table.rt th{ text-align:left; color:var(--ts); font-size:10px; font-weight:600; padding:0 8px 7px; border-bottom:1px solid rgba(255,255,255,.08); }
+  table.rt td{ padding:7px 8px; border-bottom:1px solid rgba(255,255,255,.05); }
+  table.rt tr:last-child td{ border-bottom:none; }
+  .num{ text-align:right; } .up-t{ color:var(--up); font-weight:700; } .down-t{ color:var(--down); font-weight:700; } .mix-t{ color:var(--blue); font-weight:700; }
+  /* 合规面板 */
+  .chk-item{ display:flex; align-items:flex-start; gap:10px; padding:11px 2px; font-size:12px; }
+  .chk-item + .chk-item{ border-top:1px solid rgba(255,255,255,.06); }
+  .chk-ic{ width:20px; height:20px; border-radius:7px; flex-shrink:0; display:grid; place-items:center; font-size:11px; font-weight:800; }
+  .ck-pass{ background:rgba(255,255,255,.9); color:#050506; }
+  .ck-warn{ background:rgba(255,171,102,.15); color:var(--orange); border:1px solid rgba(255,171,102,.45); }
+  .ck-pend{ background:rgba(255,255,255,.07); color:var(--ts); border:1px solid rgba(255,255,255,.15); }
+  .chk-item .t{ flex:1; line-height:1.5; }
+  .chk-item .s{ font-size:10px; color:var(--ts); margin-top:3px; }
+  /* 合规状态进度条 */
+  .cmp-steps{ display:flex; gap:0; margin:14px 0 4px; }
+  .cmp-step{ flex:1; text-align:center; position:relative; padding-top:18px; font-size:10px; color:var(--ts); }
+  .cmp-step::before{ content:""; position:absolute; top:5px; left:50%; transform:translateX(-50%); width:11px; height:11px; border-radius:50%; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2); }
+  .cmp-step::after{ content:""; position:absolute; top:10px; left:calc(-50% + 8px); right:calc(50% + 8px); height:1.5px; background:rgba(255,255,255,.15); }
+  .cmp-step:first-child::after{ display:none; }
+  .cmp-step.done{ color:var(--up); } .cmp-step.done::before{ background:#fff; box-shadow:0 0 8px rgba(255,255,255,.6); } .cmp-step.done::after{ background:rgba(255,255,255,.55); }
+  .cmp-step.cur{ color:var(--orange); font-weight:700; } .cmp-step.cur::before{ background:var(--orange); box-shadow:0 0 8px rgba(255,171,102,.8); animation:pulse 1.4s infinite; } .cmp-step.cur::after{ background:rgba(255,255,255,.55); }
+  .pill-btn{ padding:10px 20px; border-radius:100px; border:1px solid var(--gb); background:rgba(255,255,255,.08);
+    color:var(--tp); font-size:12.5px; font-weight:600; cursor:pointer; }
+  .pill-btn.primary{ background:rgba(255,255,255,.94); color:#050506; }
+  .pill-btn.warn{ border-color:rgba(255,171,102,.5); color:var(--orange); }
+  .footbar{ display:flex; align-items:center; justify-content:space-between; gap:14px; padding:14px 24px; flex-wrap:wrap; font-size:11px; color:var(--ts); }
+  .audit-log{ font-size:10.5px; color:var(--ts); line-height:1.9; }
+  .audit-log b{ color:rgba(255,255,255,.75); font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="proto-banner">
+  <b>金策 FinSight</b><span>·</span><span>产品原型（非上线产品）</span><span class="dotsep">·</span><span>数据为演示用模拟数据</span><span class="dotsep">·</span><span>报告未经签发不得对外</span>
+</div>
+
+<div class="aurora"><div class="orb o1"></div><div class="orb o2"></div></div>
+
+<div class="wrap">
+
+  <div class="topbar glass">
+    <div>
+      <h1>报告预览与签发 · 加息情景专题</h1>
+      <div class="meta-row">
+        <span>生成时间 2026-07-19 09:56:12 CST</span>
+        <span class="src">Report Integrator · report-v1</span>
+        <span class="src">证据支持率 94% · 引用 [E1]–[E16]</span>
+        <span class="ai-badge">AI 生成内容 · 已标识</span>
+        <span class="st st-review"><i></i>待人工确认签发</span>
+      </div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="pill-btn">版本对比 v0.3 ↔ v0.2</button>
+      <button class="pill-btn warn">驳回重写</button>
+      <button class="pill-btn primary">人工确认签发</button>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 内部投研版 -->
+    <div class="card glass">
+      <div class="card-title">内部投研版 <span class="lv lv-fact">内部使用 · 含完整证据链</span></div>
+      <div class="card-sub">读者：研究员 / 投资经理 · 含推断与置信度全量披露</div>
+      <div class="doc">
+        <span class="doc-mark ai-badge">AI 生成</span>
+        <h2>美联储加息信号下的多资产影响推演</h2>
+        <div class="doc-meta">
+          <span>编号 RPT-20260719-007</span><span>版本 v0.3 草稿</span><span>数据截至 09:40 CST</span>
+          <span class="conf">整体置信度 <span class="bar"><i style="width:74%"></i></span>74%</span>
+        </div>
+
+        <h3>一、核心结论 <span class="lv lv-infer">推断</span></h3>
+        <p>基准情景（概率 55%）：年内再加息 25bp，美元指数高位震荡，实际利率上行 25–50bp。黄金承压 <span class="numv down-t">-3% ~ -6%</span> <span class="evi">[E4]</span><span class="evi">[E9]</span>；美股估值承压 <span class="numv down-t">-2% ~ -5%</span> <span class="evi">[E6]</span>；人民币资产汇弱债稳 <span class="evi">[E10]</span><span class="evi">[E11]</span>。</p>
+
+        <h3>二、事实基础 <span class="lv lv-fact">事实</span></h3>
+        <p>美联储主席发布会"必要时进一步收紧"表述（2026-07-17，原文 §3）<span class="evi">[E1]</span>；利率期货隐含再加息概率 <span class="numv">68%</span>（模拟行情，09:30）<span class="evi">[E4]</span>。</p>
+
+        <h3>三、因果链摘要 <span class="lv lv-infer">推断</span></h3>
+        <p>加息 → 政策利率↑（即时）→ 美元指数↑（1–4 周）→ 实际利率↑（2–8 周）→ 黄金持有成本↑、美股折现率↑、中美利差走阔。失效条件：CPI 连续两月回落、实际利率 &lt; 1.2% <span class="evi">[E9]</span><span class="evi">[E13]</span>。</p>
+
+        <h3>四、三情景资产影响矩阵 <span class="lv lv-infer">情景假设</span></h3>
+        <table class="rt">
+          <tr><th>资产</th><th class="num">乐观 20%</th><th class="num">基准 55%</th><th class="num">悲观 25%</th></tr>
+          <tr><td>黄金</td><td class="num up-t">+4%~+8%</td><td class="num down-t">-3%~-6%</td><td class="num down-t">-8%~-12%</td></tr>
+          <tr><td>原油</td><td class="num">-2%~+3%</td><td class="num mix-t">-4%~+2%</td><td class="num down-t">-8%~-15%</td></tr>
+          <tr><td>美股</td><td class="num up-t">+3%~+6%</td><td class="num down-t">-2%~-5%</td><td class="num down-t">-8%~-12%</td></tr>
+          <tr><td>人民币资产</td><td class="num up-t">+1%~+3%</td><td class="num mix-t">汇弱债稳</td><td class="num down-t">汇 -3%~-5%</td></tr>
+        </table>
+
+        <h3>五、对模拟客户A 组合的影响 <span class="lv lv-infer">推断</span></h3>
+        <p>悲观情景下组合回撤预估 <span class="numv down-t">-4.2%</span>（约 -¥218,400），权益集中度 38% 超 R3 内控关注线，建议关注方案 B（温和再平衡）<span class="evi">[E15]</span>。争议点：美股盈利韧性判断存在机构分歧，标记为争议观点未采信 <span class="evi">[E6]</span>。</p>
+
+        <div class="riskbox">风险提示：本报告为 AI 辅助生成的研究草稿，全部情景概率与测算为主观模型推断，不构成投资建议或收益承诺；历史相似事件（2018Q4 / 2022H2）不构成线性外推依据。</div>
+
+        <div class="footer-sign">
+          <span>证据链：16 条 · 支持率 94% · 失效条件 7 条</span>
+          <span>签发状态：待投资经理人工确认</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 客户沟通版 -->
+    <div class="card glass">
+      <div class="card-title">客户沟通版 <span class="lv lv-view">面向模拟客户A · R3</span></div>
+      <div class="card-sub">弱化术语 · 强制风险提示 · 适当性表述 · 发送前须双重确认</div>
+      <div class="doc">
+        <span class="doc-mark ai-badge">AI 生成 · 顾问复核后发送</span>
+        <h2>市场变动与您的资产安排（沟通稿）</h2>
+        <div class="doc-meta">
+          <span>模拟客户A · 稳健型 · R3</span><span>顾问：待署名</span><span>2026-07-19</span>
+        </div>
+
+        <h3>发生了什么</h3>
+        <p>近期美联储表示，如果通胀回落不及预期，可能进一步加息。这意味着美元利率可能在更高水平维持更久。</p>
+
+        <h3>对您持仓的可能影响</h3>
+        <p>您的组合以稳健配置为主（权益约 38%、固收 22%、黄金 14%、美元资产 10%、现金 16%）。在我们的中性测算下，短期组合可能出现约 <span class="numv">1% 左右</span>的波动；若紧缩明显超预期，极端情况下回撤可能达到 <span class="numv">4% 左右</span>。黄金与短久期债券仓位有助于缓冲波动。</p>
+
+        <h3>我们可以怎么做</h3>
+        <p>三种思路供参考：A. 维持观察；B. 温和再平衡（小幅降低权益、增加短债与黄金）；C. 显著防御。任何调整都需要您的明确同意，我们不会替您做出决定。</p>
+
+        <div class="riskbox">
+          重要风险提示：本材料由 AI 辅助生成、经财富顾问复核；内容为市场分析沟通，不构成投资建议或收益承诺。市场有风险，投资须谨慎。以上测算基于模拟假设，未来实际结果可能显著不同。您的风险等级为 R3（稳健型），相关方案已完成适当性匹配检查。
+        </div>
+
+        <div class="footer-sign">
+          <span>AI 内容标识：已标注 · 客户同意书：待签署</span>
+          <span>发送状态：待顾问 + 合规双确认</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 合规审核面板 -->
+    <div style="display:flex; flex-direction:column; gap:16px; min-width:0;">
+      <div class="card glass">
+        <div class="card-title">合规审核状态</div>
+        <div class="card-sub">Compliance Reviewer · 规则库 v2026.07</div>
+        <div class="cmp-steps">
+          <div class="cmp-step done">生成</div>
+          <div class="cmp-step done">机器审核</div>
+          <div class="cmp-step cur">人工确认</div>
+          <div class="cmp-step">签发</div>
+          <div class="cmp-step">归档审计</div>
+        </div>
+        <div class="chk-item"><span class="chk-ic ck-pass">✓</span><div class="t">收益承诺检测<div class="s">未发现承诺性表述 · 0 命中</div></div></div>
+        <div class="chk-item"><span class="chk-ic ck-pass">✓</span><div class="t">无依据建议识别<div class="s">全部结论附证据编号 · 支持率 94%</div></div></div>
+        <div class="chk-item"><span class="chk-ic ck-pass">✓</span><div class="t">风险提示完整性<div class="s">内部版 / 客户版均含风险提示块</div></div></div>
+        <div class="chk-item"><span class="chk-ic ck-pass">✓</span><div class="t">适当性检查<div class="s">客户版表述与 R3 等级匹配</div></div></div>
+        <div class="chk-item"><span class="chk-ic ck-pass">✓</span><div class="t">AI 内容标识<div class="s">双版本均已标注 AI 生成</div></div></div>
+        <div class="chk-item"><span class="chk-ic ck-warn">!</span><div class="t">表述复核（1 处）<div class="s">客户版"有助于缓冲波动"建议改为"可能有助于降低部分波动"</div></div></div>
+        <div class="chk-item"><span class="chk-ic ck-pend">…</span><div class="t">人工确认签发<div class="s">投资经理（内部版）· 财富顾问 + 客户同意（客户版）</div></div></div>
+      </div>
+
+      <div class="card glass">
+        <div class="card-title">人工确认</div>
+        <div class="card-sub">确认即留痕：确认人 · 时间 · 版本 · 意见</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="pill-btn primary" style="width:100%;">确认并签发内部版</button>
+          <button class="pill-btn" style="width:100%;">采纳修改建议后签发客户版</button>
+          <button class="pill-btn warn" style="width:100%;">驳回并附意见</button>
+        </div>
+      </div>
+
+      <div class="card glass">
+        <div class="card-title">审计留痕</div>
+        <div class="card-sub">全程可追溯 · 不可篡改</div>
+        <div class="audit-log">
+          <div><b>09:45:02</b> Run #R-2047 创建 · 提示词 v0.9</div>
+          <div><b>09:48:20</b> 人工复核：集中度阈值确认（研究员）</div>
+          <div><b>09:56:12</b> 报告 v0.3 生成 · 引用 [E1]–[E16]</div>
+          <div><b>09:56:14</b> 机器审核通过 5 项 · 表述复核 1 项</div>
+          <div><b>待记录</b> 人工确认签发 · 发送 · 客户同意</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footbar glass">
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <span class="st st-review"><i></i>合规状态：机器审核通过 · 1 处表述复核 · 等待人工确认签发</span>
+      <span>权限：客户版发送需财富顾问 + 客户双重同意</span>
+      <span style="color:var(--down);">风险提示：报告为模拟演示内容，不构成投资建议；AI 生成内容已按规范标识。</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <span class="lv lv-fact">事实</span><span class="lv lv-view">观点/共识</span><span class="lv lv-infer">推断/假设</span><span class="lv lv-risk">风险提示</span>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
